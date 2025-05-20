@@ -1,0 +1,296 @@
+/* Estilos para la aplicación de contactos */
+.app-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-height: 90vh;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-info span {
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+.main-menu {
+  margin: 20px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.main-menu ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+}
+
+.main-menu li {
+  margin-right: 20px;
+}
+
+.main-menu a {
+  display: block;
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.main-menu a.active,
+.main-menu a:hover {
+  border-bottom: 2px solid #4caf50;
+  color: #4caf50;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  margin-right: 15px;
+}
+
+.search-box input {
+  margin-right: 5px;
+}
+
+.filters {
+  margin-bottom: 20px;
+}
+
+.contacts-list, 
+.categories-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.contact-card {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  position: relative;
+}
+
+.contact-card .contact-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  background-color: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.contact-card .contact-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contact-card .contact-details {
+  text-align: center;
+}
+
+.contact-card .contact-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+.contact-card .contact-info {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+}
+
+.contact-card .contact-category {
+  font-size: 0.8em;
+  background-color: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.contact-card .card-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+.contact-card .card-actions button {
+  background: none;
+  border: none;
+  color: #4caf50;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.contact-card .card-actions button:hover {
+  text-decoration: underline;
+}
+
+.category-card {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.category-card .category-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.category-card .card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.category-card .card-actions button {
+  background: none;
+  border: none;
+  color: #4caf50;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.category-card .card-actions button:hover {
+  text-decoration: underline;
+}
+
+/* Estilos para los modales */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: black;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  margin-left: 10px;
+}
+
+.imagen-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: 10px;
+  background-color: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.imagen-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Estilos para botones */
+.btn-primary, .btn-secondary {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-secondary {
+  background: #f4f4f4;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-primary:hover {
+  background: #45a049;
+}
+
+.btn-secondary:hover {
+  background: #e9e9e9;
+}
+
+/* Estilos para sección de ayuda */
+.help-content {
+  line-height: 1.6;
+}
+
+.help-content h3 {
+  margin: 20px 0 10px;
+}
+
+.help-content ul {
+  margin-left: 20px;
+}

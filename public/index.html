@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda de Contactos</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Agenda de Contactos</h1>
+    <div id="loginForm">
+      <h2>Iniciar Sesión</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Usuario:</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Clave:</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <div class="error-message" id="login-error"></div>
+        <button type="submit">Login</button>
+      </form>
+      <p>¿No tienes credenciales? <a href="#" id="register-link">Registrar</a></p>
+    </div>
+    
+    <div id="registerForm" style="display: none;">
+      <h2>Registrar Nuevo Usuario</h2>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="new-username">Usuario:</label>
+          <input type="text" id="new-username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="new-password">Clave:</label>
+          <input type="password" id="new-password" name="password" required>
+          <small>La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y un símbolo.</small>
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirmar Clave:</label>
+          <input type="password" id="confirm-password" name="confirmPassword" required>
+        </div>
+        <div class="error-message" id="register-error"></div>
+        <button type="submit">Registrar</button>
+      </form>
+      <p>¿Ya tienes una cuenta? <a href="#" id="login-link">Iniciar Sesión</a></p>
+    </div>
+  </div>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

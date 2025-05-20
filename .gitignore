@@ -1,0 +1,31 @@
+# Dependencias
+node_modules/
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Base de datos SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# Carpeta de imágenes subidas (opcional, según prefieras)
+# public/img/*
+# !public/img/default-profile.png
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE y editores
+.idea/
+.vscode/
+*.swp
+*.swo

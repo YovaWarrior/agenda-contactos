@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda de Contactos</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/contactos.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Agenda de Contactos</h1>
+      <div class="user-info">
+        <span id="username-display"></span>
+        <button id="logout-btn" class="btn-secondary">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <nav class="main-menu">
+      <ul>
+        <li><a href="#" id="menu-contactos" class="active">Contactos</a></li>
+        <li><a href="#" id="menu-categorias">Categorías</a></li>
+        <li><a href="#" id="menu-ayuda">Ayuda</a></li>
+      </ul>
+    </nav>
+
+    <div class="content">
+      <!-- Sección de Contactos -->
+      <section id="contactos-section">
+        <div class="section-header">
+          <h2>Contactos</h2>
+          <div class="actions">
+            <div class="search-box">
+              <input type="text" id="search-input" placeholder="Buscar contacto...">
+              <button id="search-btn">Buscar</button>
+            </div>
+            <button id="add-contact-btn" class="btn-primary">Añadir Contacto</button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <label for="categoria-filter">Filtrar por categoría:</label>
+          <select id="categoria-filter">
+            <option value="">Todas las categorías</option>
+            <!-- Opciones se cargarán dinámicamente -->
+          </select>
+        </div>
+
+        <div class="contacts-list" id="contacts-list">
+          <!-- Los contactos se cargarán dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Sección de Categorías -->
+      <section id="categorias-section" style="display: none;">
+        <div class="section-header">
+          <h2>Categorías</h2>
+          <button id="add-category-btn" class="btn-primary">Añadir Categoría</button>
+        </div>
+
+        <div class="categories-list" id="categories-list">
+          <!-- Las categorías se cargarán dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Sección de Ayuda -->
+      <section id="ayuda-section" style="display: none;">
+        <h2>Ayuda</h2>
+        <div class="help-content">
+          <h3>Acerca de la Agenda de Contactos</h3>
+          <p>Esta aplicación te permite gestionar tus contactos de manera sencilla y eficiente.</p>
+          <p>Versión: 1.0.0</p>
+          
+          <h3>Funcionalidades:</h3>
+          <ul>
+            <li><strong>Gestión de Contactos:</strong> Añadir, editar, buscar y eliminar contactos.</li>
+            <li><strong>Categorías:</strong> Organiza tus contactos por categorías para facilitar su búsqueda.</li>
+            <li><strong>Imágenes:</strong> Añade imágenes a tus contactos para identificarlos fácilmente.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- Modal para añadir/editar contacto -->
+    <div class="modal" id="contact-modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modal-title">Añadir Contacto</h2>
+        <form id="contact-form">
+          <input type="hidden" id="contact-id">
+          
+          <div class="form-group">
+            <label for="nombre">Nombre*:</label>
+            <input type="text" id="nombre" name="nombre" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido">
+          </div>
+          
+          <div class="form-group">
+            <label for="telefono">Teléfono*:</label>
+            <input type="text" id="telefono" name="telefono" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email">
+          </div>
+          
+          <div class="form-group">
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion" name="direccion">
+          </div>
+          
+          <div class="form-group">
+            <label for="categoria">Categoría:</label>
+            <select id="categoria" name="categoria">
+              <option value="">Sin categoría</option>
+              <!-- Opciones se cargarán dinámicamente -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="imagen">Imagen:</label>
+            <input type="file" id="imagen" name="imagen" accept="image/*">
+            <div id="imagen-preview" class="imagen-preview"></div>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
+            <button type="submit" id="save-btn" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para añadir/editar categoría -->
+    <div class="modal" id="category-modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="category-modal-title">Añadir Categoría</h2>
+        <form id="category-form">
+          <input type="hidden" id="category-id">
+          
+          <div class="form-group">
+            <label for="nombre-categoria">Nombre*:</label>
+            <input type="text" id="nombre-categoria" name="nombre" required>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" id="cancel-category-btn" class="btn-secondary">Cancelar</button>
+            <button type="submit" id="save-category-btn" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/contactos.js"></script>
+</body>
+</html>
