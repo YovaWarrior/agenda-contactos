@@ -326,44 +326,119 @@ async function getUserInfo() {
   }
 
   // Editar contacto
-  async function editContact(id) {
-    try {
-      const response = await fetch(`/api/contactos/${id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al obtener contacto');
+async function editContact(id) {
+  try {
+    console.log('Intentando editar contacto ID:', id);
+    
+    const response = await fetch(`/api/contactos/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
+    });
 
-      const data = await response.json();
-      const contacto = data.contacto;
-      
-      // Llenar formulario con datos del contacto
-      contactId.value = contacto.id;
-      document.getElementById('nombre').value = contacto.nombre;
-      document.getElementById('apellido').value = contacto.apellido || '';
-      document.getElementById('telefono').value = contacto.telefono;
-      document.getElementById('email').value = contacto.email || '';
-      document.getElementById('direccion').value = contacto.direccion || '';
-      document.getElementById('categoria').value = contacto.categoria_id || '';
-      
-      // Mostrar imagen actual si existe
-      if (contacto.ruta_imagen) {
-        imagenPreview.innerHTML = `<img src="/img/${contacto.ruta_imagen}" alt="${contacto.nombre}">`;
-      } else {
-        imagenPreview.innerHTML = '';
-      }
-      
-      openContactModal(true);
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error al obtener información del contacto');
+    if (!response.ok) {
+      throw new Error(`Error al obtener contacto: ${response.status} ${response.statusText}`);
     }
+    
+    const data = await response.json();
+    console.log('Datos completos recibidos:', data);
+    
+    const contacto = data.contacto;
+    
+    // Verificar que contacto existe y tiene datos
+    if (!contacto) {
+      console.error('No se recibieron datos del contacto o formato incorrecto:', data);
+      throw new Error('No se recibieron datos del contacto');
+    }
+    
+    console.log('Datos del contacto recibidos:', contacto);
+    
+    // Asegurarnos de abrir el modal antes de intentar actualizar los campos
+    openContactModal(true);
+    
+    // Dar tiempo para que el DOM se actualice antes de asignar valores
+    setTimeout(() => {
+      try {
+        // Verificar y asignar a cada campo
+        contactId.value = contacto.id;
+        
+        // Obtener referencias a los elementos del DOM después de que el modal esté visible
+        const nombreElement = document.getElementById('nombre');
+        const apellidoElement = document.getElementById('apellido');
+        const telefonoElement = document.getElementById('telefono');
+        const emailElement = document.getElementById('email');
+        const direccionElement = document.getElementById('direccion');
+        const categoriaElement = document.getElementById('categoria');
+        
+        console.log('Elementos DOM obtenidos:', {
+          nombreElement, apellidoElement, telefonoElement, 
+          emailElement, direccionElement, categoriaElement
+        });
+        
+        // Asignar valores solo si los elementos existen
+        if (nombreElement) {
+          nombreElement.value = contacto.nombre || '';
+          console.log('Asignado nombre:', nombreElement.value);
+        } else {
+          console.error('Elemento nombre no encontrado en el DOM');
+        }
+        
+        if (apellidoElement) {
+          apellidoElement.value = contacto.apellido || '';
+          console.log('Asignado apellido:', apellidoElement.value);
+        } else {
+          console.error('Elemento apellido no encontrado en el DOM');
+        }
+        
+        if (telefonoElement) {
+          telefonoElement.value = contacto.telefono || '';
+          console.log('Asignado teléfono:', telefonoElement.value);
+        } else {
+          console.error('Elemento teléfono no encontrado en el DOM');
+        }
+        
+        if (emailElement) {
+          emailElement.value = contacto.email || '';
+          console.log('Asignado email:', emailElement.value);
+        } else {
+          console.error('Elemento email no encontrado en el DOM');
+        }
+        
+        if (direccionElement) {
+          direccionElement.value = contacto.direccion || '';
+          console.log('Asignado dirección:', direccionElement.value);
+        } else {
+          console.error('Elemento dirección no encontrado en el DOM');
+        }
+        
+        if (categoriaElement) {
+          categoriaElement.value = contacto.categoria_id || '';
+          console.log('Asignado categoría:', categoriaElement.value);
+        } else {
+          console.error('Elemento categoría no encontrado en el DOM');
+        }
+        
+        // Mostrar imagen actual si existe
+        if (contacto.ruta_imagen) {
+          imagenPreview.innerHTML = `<img src="/img/${contacto.ruta_imagen}" alt="${contacto.nombre}">`;
+          console.log('Imagen asignada');
+        } else {
+          imagenPreview.innerHTML = '';
+          console.log('No hay imagen para mostrar');
+        }
+        
+        console.log('Formulario actualizado completamente');
+      } catch (err) {
+        console.error('Error al asignar valores al formulario:', err);
+      }
+    }, 100); // Pequeño retraso para asegurar que el modal está completamente cargado
+    
+  } catch (error) {
+    console.error('Error detallado al obtener contacto:', error);
+    alert('Error al obtener información del contacto: ' + error.message);
   }
+}
 
   // Eliminar contacto
   async function deleteContact(id) {
