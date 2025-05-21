@@ -5,44 +5,52 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Noto Sans', sans-serif;
   line-height: 1.6;
-  background-color: #f4f4f4;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  font-size: 14px;
 }
 
 .container {
   width: 100%;
-  max-width: 500px;
+  max-width: 420px;
   margin: 0 auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--shadow-color), 0 10px 15px -5px var(--shadow-color);
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: 24px;
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 24px;
 }
 
 h2 {
-  margin-bottom: 20px;
-  color: #444;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 18px;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 input[type="text"],
@@ -50,36 +58,54 @@ input[type="password"],
 input[type="email"],
 select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: border-color 0.15s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(2, 106, 167, 0.2);
 }
 
 button {
   display: block;
   width: 100%;
-  padding: 10px;
-  background: #4caf50;
-  color: #fff;
+  padding: 10px 12px;
+  background: var(--primary-color);
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 16px;
-  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 12px;
+  transition: background 0.2s ease;
 }
 
 button:hover {
-  background: #45a049;
+  background: var(--primary-light);
 }
 
 p {
-  margin-top: 15px;
+  margin-top: 16px;
   text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 a {
-  color: #4caf50;
+  color: var(--primary-light);
   text-decoration: none;
+  font-weight: 500;
 }
 
 a:hover {
@@ -87,14 +113,44 @@ a:hover {
 }
 
 .error-message {
-  color: #f44336;
-  font-size: 14px;
-  margin-top: 5px;
+  color: var(--danger-color);
+  font-size: 13px;
+  margin-top: 6px;
 }
 
 small {
   display: block;
-  margin-top: 5px;
-  color: #666;
+  margin-top: 6px;
+  color: var(--text-secondary);
   font-size: 12px;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  background: var(--menu-hover);
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 100%;
+    border-radius: 0;
+    padding: 20px;
+    box-shadow: none;
+  }
 }

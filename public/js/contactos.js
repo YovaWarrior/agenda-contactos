@@ -55,7 +55,9 @@ document.addEventListener('DOMContentLoaded', function() {
       usernameDisplay.textContent = data.usuario.username;
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al obtener información del usuario');
+      alert('Error al obtener información del usuario. Por favor, inicia sesión nuevamente.');
+      localStorage.removeItem('token');
+      window.location.href = '/';
     }
   }
 
@@ -83,9 +85,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const data = await response.json();
       displayContacts(data.contactos);
+      return data.contactos; // Devolver los contactos para usarlos en otras funciones
     } catch (error) {
       console.error('Error:', error);
       contactsList.innerHTML = '<p>Error al cargar contactos</p>';
+      return []; // Devolver array vacío en caso de error
+    }
+  }
+
+  // Obtener el conteo de contactos por categoría
+  async function getContactCountsByCategory() {
+    try {
+      // Cargamos todos los contactos
+      const contactos = await loadContacts();
+      
+      // Creamos un objeto para contar los contactos por categoría
+      const counts = {};
+      
+      // Contamos los contactos por categoría
+      contactos.forEach(contacto => {
+        if (contacto.categoria_id && contacto.categoria_nombre) {
+          if (!counts[contacto.categoria_id]) {
+            counts[contacto.categoria_id] = {
+              nombre: contacto.categoria_nombre,
+              count: 0
+            };
+          }
+          counts[contacto.categoria_id].count++;
+        }
+      });
+      
+      return counts;
+    } catch (error) {
+      console.error('Error al obtener conteo de contactos por categoría:', error);
+      return {}; // Devolver objeto vacío en caso de error
     }
   }
 
@@ -147,7 +180,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       const data = await response.json();
-      displayCategories(data.categorias);
+      
+      // Obtener el conteo de contactos por categoría
+      const contactCountsByCategory = await getContactCountsByCategory();
+      
+      // Mostrar categorías con su conteo correcto
+      displayCategories(data.categorias, contactCountsByCategory);
       populateCategoryDropdowns(data.categorias);
     } catch (error) {
       console.error('Error:', error);
@@ -156,23 +194,65 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Mostrar categorías en la interfaz
-  function displayCategories(categorias) {
+  function displayCategories(categorias, contactCountsByCategory = {}) {
     categoriesList.innerHTML = '';
     
     if (categorias.length === 0) {
-      categoriesList.innerHTML = '<p>No hay categorías para mostrar</p>';
+      categoriesList.innerHTML = '<p style="text-align: center; padding: 20px;">No hay categorías para mostrar</p>';
       return;
     }
+    
+    // Estilo para el contenedor similar al de los contactos
+    categoriesList.style.display = 'grid';
+    categoriesList.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+    categoriesList.style.gap = '20px';
+    categoriesList.style.marginTop = '20px';
+    
+    // Colores para las categorías según lo mostrado en la imagen
+    const colorMap = {
+      'Amigos': '#e91e63',  // Rosa/Rojo
+      'Familia': '#4caf50',  // Verde
+      'Otros': '#9c27b0',   // Púrpura
+      'Trabajo': '#ff9800',  // Naranja
+      'futbol': '#2196f3'    // Azul (para la nueva categoría que vi en la imagen)
+    };
     
     categorias.forEach(categoria => {
       const categoryCard = document.createElement('div');
       categoryCard.className = 'category-card';
+      categoryCard.style.border = '1px solid #e0e0e0'; 
+      categoryCard.style.borderRadius = '4px';
+      categoryCard.style.padding = '15px';
+      categoryCard.style.backgroundColor = '#fff';
+      categoryCard.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      
+      // Obtener color para el punto basado en el nombre de categoría
+      const color = colorMap[categoria.nombre] || '#607d8b'; // Gris como predeterminado
+      
+      // Obtener el conteo de contactos para esta categoría
+      const categoryInfo = contactCountsByCategory[categoria.id] || { count: 0 };
+      const contactCount = categoryInfo.count;
       
       categoryCard.innerHTML = `
-        <div class="category-name">${categoria.nombre}</div>
-        <div class="card-actions">
-          <button class="edit-category-btn" data-id="${categoria.id}">Editar</button>
-          <button class="delete-category-btn" data-id="${categoria.id}">Eliminar</button>
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+          <span style="display: inline-block; width: 10px; height: 10px; background-color: ${color}; border-radius: 50%; margin-right: 10px;"></span>
+          <span style="font-weight: bold;">${categoria.nombre}</span>
+        </div>
+        
+        <div style="margin-bottom: 15px; display: flex; align-items: center; color: #666;">
+          <span style="display: inline-block; width: 20px;">👤</span>
+          <span>${contactCount} contactos</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between;">
+          <button class="edit-category-btn" data-id="${categoria.id}" style="background: none; border: none; color: #0066cc; cursor: pointer; display: flex; align-items: center;">
+            <span style="margin-right: 5px;">✏️</span>
+            <span>Editar</span>
+          </button>
+          <button class="delete-category-btn" data-id="${categoria.id}" style="background: none; border: none; color: #e53935; cursor: pointer; display: flex; align-items: center;">
+            <span style="margin-right: 5px;">🗑️</span>
+            <span>Eliminar</span>
+          </button>
         </div>
       `;
       
@@ -287,6 +367,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Recargar contactos
         loadContacts();
+        // Recargar categorías para actualizar conteos
+        loadCategories();
       } catch (error) {
         console.error('Error:', error);
         alert('Error al eliminar contacto');
@@ -491,6 +573,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
       closeModals();
       loadContacts();
+      // Recargar categorías para actualizar conteos
+      loadCategories();
     } catch (error) {
       console.error('Error:', error);
       alert(`Error al ${isEdit ? 'actualizar' : 'crear'} contacto`);
@@ -524,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       closeModals();
       loadCategories();
-      // Recargar filtro de categorías
+      // Recargar contactos (por si alguno usaba esta categoría)
       loadContacts();
     } catch (error) {
       console.error('Error:', error);

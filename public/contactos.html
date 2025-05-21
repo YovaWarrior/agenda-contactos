@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agenda de Contactos</title>
+  <link rel="stylesheet" href="/css/themes.css">
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/contactos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="app-container">
@@ -14,6 +16,11 @@
       <div class="user-info">
         <span id="username-display"></span>
         <button id="logout-btn" class="btn-secondary">Cerrar Sesión</button>
+        <div class="theme-toggle-container">
+          <button id="theme-toggle" class="theme-toggle">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -33,9 +40,13 @@
           <div class="actions">
             <div class="search-box">
               <input type="text" id="search-input" placeholder="Buscar contacto...">
-              <button id="search-btn">Buscar</button>
+              <button id="search-btn" class="btn-primary">
+                <i class="fas fa-search"></i>
+              </button>
             </div>
-            <button id="add-contact-btn" class="btn-primary">Añadir Contacto</button>
+            <button id="add-contact-btn" class="btn-primary">
+              <i class="fas fa-plus"></i> Añadir Contacto
+            </button>
           </div>
         </div>
 
@@ -56,7 +67,9 @@
       <section id="categorias-section" style="display: none;">
         <div class="section-header">
           <h2>Categorías</h2>
-          <button id="add-category-btn" class="btn-primary">Añadir Categoría</button>
+          <button id="add-category-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Añadir Categoría
+          </button>
         </div>
 
         <div class="categories-list" id="categories-list">
@@ -77,6 +90,8 @@
             <li><strong>Gestión de Contactos:</strong> Añadir, editar, buscar y eliminar contactos.</li>
             <li><strong>Categorías:</strong> Organiza tus contactos por categorías para facilitar su búsqueda.</li>
             <li><strong>Imágenes:</strong> Añade imágenes a tus contactos para identificarlos fácilmente.</li>
+            <li><strong>Notificaciones por correo:</strong> Los contactos reciben una notificación por correo cuando son añadidos.</li>
+            <li><strong>Modo oscuro:</strong> Cambia entre el modo claro y oscuro según tu preferencia.</li>
           </ul>
         </div>
       </section>
@@ -159,6 +174,7 @@
     </div>
   </div>
 
+  <script src="/js/theme.js"></script>
   <script src="/js/contactos.js"></script>
 </body>
 </html>

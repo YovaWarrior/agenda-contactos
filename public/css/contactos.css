@@ -1,21 +1,31 @@
-/* Estilos para la aplicación de contactos */
+/* Estilos para la aplicación de contactos - Estilo Trello */
 .app-container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  min-height: 90vh;
+  padding: 0;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  padding: 8px 16px;
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+header h1 {
+  margin: 0;
+  color: var(--header-text);
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .user-info {
@@ -25,43 +35,78 @@ header {
 
 .user-info span {
   margin-right: 15px;
-  font-weight: bold;
+  font-weight: 600;
+  color: var(--header-text);
+  font-size: 14px;
+}
+
+#logout-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  color: white;
+  padding: 6px 12px;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+#logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .main-menu {
-  margin: 20px 0;
-  border-bottom: 1px solid #eee;
+  background-color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .main-menu ul {
   display: flex;
   list-style: none;
-  padding: 0;
+  padding: 0 16px;
+  margin: 0;
 }
 
 .main-menu li {
-  margin-right: 20px;
+  margin-right: 4px;
 }
 
 .main-menu a {
   display: block;
-  padding: 10px 15px;
-  color: #333;
+  padding: 10px 16px;
+  color: var(--header-text);
   text-decoration: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 3px 3px 0 0;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
 }
 
-.main-menu a.active,
-.main-menu a:hover {
-  border-bottom: 2px solid #4caf50;
-  color: #4caf50;
+.main-menu a.active {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.main-menu a:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .actions {
@@ -71,37 +116,71 @@ header {
 
 .search-box {
   display: flex;
-  margin-right: 15px;
+  margin-right: 12px;
 }
 
 .search-box input {
-  margin-right: 5px;
+  margin-right: 4px;
+  border-radius: 3px;
+  border: 2px solid var(--border-color);
+  padding: 6px 12px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  width: 200px;
+}
+
+.search-box button {
+  margin-top: 0;
+  padding: 6px 12px;
+  background-color: var(--primary-color);
+  border-radius: 3px;
+  width: auto;
 }
 
 .filters {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.filters select {
+  padding: 8px 12px;
+  border-radius: 3px;
+  border: 2px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  width: 100%;
+  max-width: 300px;
 }
 
 .contacts-list, 
 .categories-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
 
 .contact-card {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
+  border-radius: 3px;
+  padding: 16px;
   position: relative;
+  background-color: var(--bg-card);
+  box-shadow: 0 1px 2px var(--shadow-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px var(--shadow-color);
 }
 
 .contact-card .contact-image {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  margin: 0 auto 10px;
-  background-color: #f4f4f4;
+  margin: 0 auto 12px;
+  background-color: var(--avatar-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,77 +195,109 @@ header {
 
 .contact-card .contact-details {
   text-align: center;
+  width: 100%;
 }
 
 .contact-card .contact-name {
-  font-weight: bold;
-  font-size: 1.1em;
-  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: var(--text-primary);
 }
 
 .contact-card .contact-info {
-  color: #666;
-  font-size: 0.9em;
+  color: var(--text-secondary);
+  font-size: 13px;
   margin-bottom: 3px;
 }
 
 .contact-card .contact-category {
-  font-size: 0.8em;
-  background-color: #4caf50;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 10px;
+  font-size: 11px;
+  background-color: #f2d600;
+  color: #172b4d;
+  padding: 3px 8px;
+  border-radius: 12px;
   display: inline-block;
-  margin-top: 5px;
+  margin-top: 8px;
+  font-weight: 600;
 }
 
 .contact-card .card-actions {
   display: flex;
   justify-content: space-around;
-  margin-top: 10px;
+  margin-top: 12px;
+  width: 100%;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
 }
 
 .contact-card .card-actions button {
   background: none;
   border: none;
-  color: #4caf50;
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 5px 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: auto;
+  margin: 0;
+  font-size: 13px;
 }
 
 .contact-card .card-actions button:hover {
-  text-decoration: underline;
+  color: var(--primary-light);
+  background-color: var(--menu-hover);
+  border-radius: 3px;
 }
 
 .category-card {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  background-color: #f9f9f9;
+  border-radius: 3px;
+  padding: 16px;
+  background-color: var(--bg-card);
+  box-shadow: 0 1px 2px var(--shadow-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px var(--shadow-color);
 }
 
 .category-card .category-name {
-  font-weight: bold;
-  font-size: 1.1em;
-  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  background-color: #f2d600;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
 }
 
 .category-card .card-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 12px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
 }
 
 .category-card .card-actions button {
   background: none;
   border: none;
-  color: #4caf50;
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 5px 8px;
+  font-weight: 500;
+  width: auto;
+  margin: 0;
+  font-size: 13px;
 }
 
 .category-card .card-actions button:hover {
-  text-decoration: underline;
+  color: var(--primary-light);
+  background-color: var(--menu-hover);
+  border-radius: 3px;
 }
 
 /* Estilos para los modales */
@@ -198,50 +309,55 @@ header {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(9, 30, 66, 0.54);
 }
 
 .modal-content {
-  background-color: white;
+  background-color: var(--modal-bg);
   margin: 5% auto;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  border-radius: 3px;
+  box-shadow: 0 8px 16px -4px var(--shadow-color);
   width: 90%;
-  max-width: 600px;
+  max-width: 500px;
   position: relative;
   max-height: 80vh;
   overflow-y: auto;
 }
 
 .close {
-  color: #aaa;
+  color: var(--text-secondary);
   float: right;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+  margin-top: -4px;
 }
 
 .close:hover {
-  color: black;
+  color: var(--text-primary);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .modal-actions button {
-  margin-left: 10px;
+  margin-left: 12px;
+  width: auto;
+  padding: 8px 16px;
 }
 
 .imagen-preview {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  margin-top: 10px;
-  background-color: #f4f4f4;
+  margin-top: 12px;
+  background-color: var(--avatar-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -256,41 +372,198 @@ header {
 
 /* Estilos para botones */
 .btn-primary, .btn-secondary {
-  padding: 8px 15px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
-  background: #4caf50;
+  background: var(--primary-color);
   color: white;
 }
 
 .btn-secondary {
-  background: #f4f4f4;
-  color: #333;
-  border: 1px solid #ddd;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .btn-primary:hover {
-  background: #45a049;
+  background: var(--primary-light);
 }
 
 .btn-secondary:hover {
-  background: #e9e9e9;
+  background: var(--border-color);
 }
 
 /* Estilos para sección de ayuda */
 .help-content {
   line-height: 1.6;
+  color: var(--text-primary);
+  padding: 20px;
+  background-color: var(--bg-card);
+  border-radius: 3px;
+  box-shadow: 0 1px 2px var(--shadow-color);
 }
 
 .help-content h3 {
-  margin: 20px 0 10px;
+  margin: 16px 0 8px;
+  color: var(--text-primary);
+  font-size: 16px;
 }
 
 .help-content ul {
-  margin-left: 20px;
+  margin-left: 24px;
+  color: var(--text-secondary);
+}
+
+.help-content p {
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+/* Modo oscuro toggle */
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--header-text);
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .actions {
+    margin-top: 12px;
+    width: 100%;
+  }
+  
+  .search-box {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .search-box input {
+    flex-grow: 1;
+    width: 100%;
+  }
+  
+  .contacts-list, 
+  .categories-list {
+    grid-template-columns: 1fr;
+  }
+  
+  header {
+    flex-direction: column;
+    padding: 12px;
+  }
+  
+  .user-info {
+    margin-top: 8px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .main-menu ul {
+    padding: 0 8px;
+  }
+}
+
+/* Añadir clase para la columna de tarjetas tipo Trello */
+.trello-column {
+  background-color: var(--bg-secondary);
+  border-radius: 3px;
+  padding: 8px;
+  min-width: 272px;
+  max-width: 272px;
+  margin-right: 12px;
+  height: fit-content;
+}
+
+.trello-column-header {
+  font-weight: 600;
+  padding: 8px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.trello-card-list {
+  min-height: 20px;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.badge-blue {
+  background-color: #0079BF;
+  color: white;
+}
+
+.badge-green {
+  background-color: #61BD4F;
+  color: white;
+}
+
+.badge-orange {
+  background-color: #FF9F1A;
+  color: #172B4D;
+}
+
+.badge-red {
+  background-color: #EB5A46;
+  color: white;
+}
+
+.badge-purple {
+  background-color: #C377E0;
+  color: white;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--avatar-bg);
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
 }

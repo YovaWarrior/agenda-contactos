@@ -1,0 +1,58 @@
+:root {
+  /* Variables para el tema claro (default) - estilo Trello */
+  --primary-color: #026aa7;
+  --primary-light: #0079bf;
+  --primary-dark: #055a8c;
+  --bg-primary: #f9fafc;
+  --bg-secondary: #ebecf0;
+  --bg-card: #ffffff;
+  --text-primary: #172b4d;
+  --text-secondary: #5e6c84;
+  --accent-color: #61bd4f;
+  --accent-hover: #49a03d;
+  --border-color: #dfe1e6;
+  --input-bg: #ffffff;
+  --shadow-color: rgba(9, 30, 66, 0.08);
+  --header-bg: #026aa7;
+  --header-text: #ffffff;
+  --nav-active: #61bd4f;
+  --modal-bg: #ffffff;
+  --danger-color: #eb5a46;
+  --success-color: #61bd4f;
+  --warning-color: #f2d600;
+  --card-hover: #f4f5f7;
+  --menu-hover: rgba(9, 30, 66, 0.08);
+  --avatar-bg: #dfe1e6;
+}
+
+[data-theme="dark"] {
+  /* Variables para el tema oscuro - estilo Trello Dark */
+  --primary-color: #1d2125;
+  --primary-light: #282e33;
+  --primary-dark: #0d1117;
+  --bg-primary: #282e33;
+  --bg-secondary: #22272b;
+  --bg-card: #2c333a;
+  --text-primary: #b6c2cf;
+  --text-secondary: #9fadbc;
+  --accent-color: #579dff;
+  --accent-hover: #85b8ff;
+  --border-color: #414a53;
+  --input-bg: #22272b;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --header-bg: #1d2125;
+  --header-text: #b6c2cf;
+  --nav-active: #579dff;
+  --modal-bg: #2c333a;
+  --danger-color: #f87168;
+  --success-color: #4bce97;
+  --warning-color: #e2b203;
+  --card-hover: #3a4148;
+  --menu-hover: rgba(255, 255, 255, 0.1);
+  --avatar-bg: #414a53;
+}
+
+/* Animación suave al cambiar de tema */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}

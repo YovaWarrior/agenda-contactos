@@ -22,7 +22,10 @@ const createTables = () => {
       db.run(`
         CREATE TABLE IF NOT EXISTS categorias (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          nombre TEXT UNIQUE NOT NULL
+          nombre TEXT NOT NULL,
+          usuario_id INTEGER,
+          FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+          UNIQUE(nombre, usuario_id)
         )
       `, (err) => {
         if (err) {
@@ -40,8 +43,10 @@ const createTables = () => {
             email TEXT,
             direccion TEXT,
             categoria_id INTEGER,
+            usuario_id INTEGER NOT NULL,
             fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (categoria_id) REFERENCES categorias(id)
+            FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
           )
         `, (err) => {
           if (err) {
@@ -75,41 +80,43 @@ const createTables = () => {
 // Insertar datos iniciales
 const insertInitialData = () => {
   return new Promise((resolve, reject) => {
-    // Insertar categorías iniciales
-    const categorias = ['Trabajo', 'Familia', 'Amigos', 'Otros'];
-    let count = 0;
+    // Crear un usuario de prueba
+    const saltRounds = 10;
+    const plainPassword = 'Admin123!';
     
-    categorias.forEach(categoria => {
-      db.run('INSERT OR IGNORE INTO categorias (nombre) VALUES (?)', [categoria], (err) => {
+    bcrypt.hash(plainPassword, saltRounds, (err, hash) => {
+      if (err) {
+        console.error('Error al crear hash de contraseña:', err.message);
+        return reject(err);
+      }
+      
+      db.run('INSERT OR IGNORE INTO usuarios (username, password) VALUES (?, ?)', ['admin', hash], function(err) {
         if (err) {
-          console.error(`Error al insertar categoría ${categoria}:`, err.message);
+          console.error('Error al crear usuario de prueba:', err.message);
           return reject(err);
         }
         
-        count++;
-        if (count === categorias.length) {
-          // Crear un usuario de prueba
-          const saltRounds = 10;
-          const plainPassword = 'Admin123!';
-          
-          bcrypt.hash(plainPassword, saltRounds, (err, hash) => {
+        const userId = this.lastID || 1;
+        
+        // Insertar categorías iniciales para el usuario admin
+        const categorias = ['Trabajo', 'Familia', 'Amigos', 'Otros'];
+        let count = 0;
+        
+        categorias.forEach(categoria => {
+          db.run('INSERT OR IGNORE INTO categorias (nombre, usuario_id) VALUES (?, ?)', [categoria, userId], (err) => {
             if (err) {
-              console.error('Error al crear hash de contraseña:', err.message);
+              console.error(`Error al insertar categoría ${categoria}:`, err.message);
               return reject(err);
             }
             
-            db.run('INSERT OR IGNORE INTO usuarios (username, password) VALUES (?, ?)', ['admin', hash], (err) => {
-              if (err) {
-                console.error('Error al crear usuario de prueba:', err.message);
-                return reject(err);
-              }
-              
+            count++;
+            if (count === categorias.length) {
               console.log('Usuario de prueba creado: admin / Admin123!');
               console.log('Datos iniciales insertados correctamente');
               resolve();
-            });
+            }
           });
-        }
+        });
       });
     });
   });

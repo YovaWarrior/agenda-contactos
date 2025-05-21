@@ -30,7 +30,7 @@ const authController = {
       const token = jwt.sign(
         { id: usuario.id, username: usuario.username },
         JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '21d' }
       );
       
       res.status(201).json({ usuario, token });
@@ -57,7 +57,7 @@ const authController = {
       const token = jwt.sign(
         { id: usuario.id, username: usuario.username },
         JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '21d' }
       );
       
       res.json({ usuario, token });
@@ -70,7 +70,12 @@ const authController = {
   // Obtener información del usuario actual
   async perfil(req, res) {
     try {
-      const usuario = await Usuario.buscarPorId(req.usuario.id);
+      // El id del usuario viene del token JWT
+      const id = req.usuario.id;
+      
+      // Este método puede fallar si se espera un 2do parámetro
+      const usuario = await Usuario.buscarPorId(id);
+      
       res.json({ usuario });
     } catch (error) {
       console.error('Error al obtener perfil:', error);
