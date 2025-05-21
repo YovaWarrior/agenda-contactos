@@ -220,11 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
     categorias.forEach(categoria => {
       const categoryCard = document.createElement('div');
       categoryCard.className = 'category-card';
-      categoryCard.style.border = '1px solid #e0e0e0'; 
+      categoryCard.style.border = '1px solid var(--border-color)'; 
       categoryCard.style.borderRadius = '4px';
       categoryCard.style.padding = '15px';
-      categoryCard.style.backgroundColor = '#fff';
-      categoryCard.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      categoryCard.style.backgroundColor = 'var(--bg-card)';
+      categoryCard.style.boxShadow = '0 1px 3px var(--shadow-color)';
       
       // Obtener color para el punto basado en el nombre de categoría
       const color = colorMap[categoria.nombre] || '#607d8b'; // Gris como predeterminado
@@ -236,20 +236,20 @@ document.addEventListener('DOMContentLoaded', function() {
       categoryCard.innerHTML = `
         <div style="display: flex; align-items: center; margin-bottom: 15px;">
           <span style="display: inline-block; width: 10px; height: 10px; background-color: ${color}; border-radius: 50%; margin-right: 10px;"></span>
-          <span style="font-weight: bold;">${categoria.nombre}</span>
+          <span style="font-weight: bold; color: var(--text-primary);">${categoria.nombre}</span>
         </div>
         
-        <div style="margin-bottom: 15px; display: flex; align-items: center; color: #666;">
+        <div style="margin-bottom: 15px; display: flex; align-items: center; color: var(--text-secondary);">
           <span style="display: inline-block; width: 20px;">👤</span>
           <span>${contactCount} contactos</span>
         </div>
         
         <div style="display: flex; justify-content: space-between;">
-          <button class="edit-category-btn" data-id="${categoria.id}" style="background: none; border: none; color: #0066cc; cursor: pointer; display: flex; align-items: center;">
+          <button class="edit-category-btn" data-id="${categoria.id}" style="background: none; border: none; color: var(--primary-light); cursor: pointer; display: flex; align-items: center;">
             <span style="margin-right: 5px;">✏️</span>
             <span>Editar</span>
           </button>
-          <button class="delete-category-btn" data-id="${categoria.id}" style="background: none; border: none; color: #e53935; cursor: pointer; display: flex; align-items: center;">
+          <button class="delete-category-btn" data-id="${categoria.id}" style="background: none; border: none; color: var(--danger-color); cursor: pointer; display: flex; align-items: center;">
             <span style="margin-right: 5px;">🗑️</span>
             <span>Eliminar</span>
           </button>
