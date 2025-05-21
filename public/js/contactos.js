@@ -37,29 +37,44 @@ document.addEventListener('DOMContentLoaded', function() {
   const imagenPreview = document.getElementById('imagen-preview');
   const categoriaSelect = document.getElementById('categoria');
 
-  // Obtener información del usuario y mostrar nombre
-  async function getUserInfo() {
-    try {
-      const response = await fetch('/api/auth/perfil', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al obtener información del usuario');
+// Obtener información del usuario y mostrar nombre
+async function getUserInfo() {
+  try {
+    console.log('Solicitando información del usuario...');
+    const response = await fetch('/api/auth/perfil', { 
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
+    });
 
-      const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`Error al obtener información del usuario: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Información del usuario recibida:', data);
+    
+    if (data && data.usuario && data.usuario.username) {
+      console.log('Nombre de usuario encontrado:', data.usuario.username);
       usernameDisplay.textContent = data.usuario.username;
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error al obtener información del usuario. Por favor, inicia sesión nuevamente.');
+      console.log('Elemento actualizado:', usernameDisplay.textContent);
+    } else {
+      console.error('Datos de usuario incompletos:', data);
+      usernameDisplay.textContent = ''; // Dejamos vacío en lugar de mostrar un valor por defecto
+    }
+  } catch (error) {
+    console.error('Error al obtener información del usuario:', error);
+    usernameDisplay.textContent = ''; // Dejamos vacío en caso de error
+    
+    // Solo redirigimos al login si es un error de autenticación
+    if (error.message.includes('401')) {
+      alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       localStorage.removeItem('token');
       window.location.href = '/';
     }
   }
+}
 
   // Cargar contactos
   async function loadContacts(categoriaId = null, searchTerm = null) {
@@ -623,6 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Inicializar la aplicación
+  console.log('Inicializando aplicación...');
   getUserInfo();
   loadContacts();
   loadCategories();

@@ -5,18 +5,6 @@ const JWT_SECRET = 'clave_secreta_agenda_contactos';
 
 // Middleware para verificar el token de autenticación
 const verificarToken = (req, res, next) => {
-  console.log('*** SOLUCIÓN TEMPORAL ACTIVADA ***');
-  console.log('Saltando verificación de token y proporcionando usuario fijo');
-  
-  // Solución temporal: Siempre permite el acceso y establece un usuario predeterminado
-  req.usuario = {
-    id: 1,
-    username: 'admin'
-  };
-  
-  next();
-  
-  /* Código original comentado
   console.log('Inicio de verificarToken middleware');
   // Obtener el token del encabezado
   const authHeader = req.headers.authorization;
@@ -57,7 +45,6 @@ const verificarToken = (req, res, next) => {
       name: error.name
     });
   }
-  */
 };
 
 module.exports = verificarToken;

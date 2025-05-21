@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
       loginError.textContent = '';
       
       try {
+        console.log('Intentando iniciar sesión con:', username);
         const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: {
@@ -75,10 +76,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (!response.ok) {
-          throw new Error('Usuario o contraseña incorrectos');
+          const data = await response.json();
+          throw new Error(data.error || 'Usuario o contraseña incorrectos');
         }
         
         const data = await response.json();
+        console.log('Inicio de sesión exitoso');
         
         // Guardar token en localStorage
         localStorage.setItem('token', data.token);
@@ -117,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       try {
+        console.log('Intentando registrar usuario:', username);
         const response = await fetch('/api/auth/registro', {
           method: 'POST',
           headers: {
@@ -125,12 +129,13 @@ document.addEventListener('DOMContentLoaded', function() {
           body: JSON.stringify({ username, password })
         });
         
+        const data = await response.json();
+        
         if (!response.ok) {
-          const data = await response.json();
           throw new Error(data.error || 'Error al registrar usuario');
         }
         
-        const data = await response.json();
+        console.log('Registro exitoso');
         
         // Guardar token en localStorage
         localStorage.setItem('token', data.token);
@@ -138,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Redirigir a la página de contactos
         window.location.href = '/contactos.html';
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al registrar:', error);
         registerError.textContent = error.message;
       }
     });
