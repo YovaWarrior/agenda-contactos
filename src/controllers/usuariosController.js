@@ -1,136 +1,97 @@
-// src/controllers/usuariosController.js
+// src/controllers/usuariosController.js - Solo gestión personal
 const Usuario = require('../models/usuario');
 const bcrypt = require('bcrypt');
 
 const usuariosController = {
-  // Listar todos los usuarios
-  async listar(req, res) {
+  // Obtener información del usuario actual (solo su propia información)
+  async obtenerPerfil(req, res) {
     try {
-      // Solo un usuario admin puede ver la lista de usuarios
-      const usuarioActual = req.usuario;
+      console.log('Obteniendo perfil del usuario ID:', req.usuario.id);
       
-      // Verificar si el usuario actual es admin (usuario con ID 1)
-      if (usuarioActual.id !== 1) {
-        return res.status(403).json({ error: 'No tienes permiso para ver la lista de usuarios' });
-      }
+      const usuario = await Usuario.buscarPorId(req.usuario.id);
+      console.log('Perfil obtenido:', usuario.username);
       
-      const usuarios = await Usuario.listarTodos();
-      res.json({ usuarios });
-    } catch (error) {
-      console.error('Error al listar usuarios:', error);
-      res.status(500).json({ error: error.message });
-    }
-  },
-  
-  // Obtener un usuario por ID
-  async obtener(req, res) {
-    try {
-      // Solo el propio usuario o un admin puede ver los detalles
-      const usuarioActual = req.usuario;
-      const idSolicitado = parseInt(req.params.id);
-      
-      if (usuarioActual.id !== idSolicitado && usuarioActual.id !== 1) {
-        return res.status(403).json({ error: 'No tienes permiso para ver este usuario' });
-      }
-      
-      const usuario = await Usuario.buscarPorId(idSolicitado);
       res.json({ usuario });
     } catch (error) {
-      console.error('Error al obtener usuario:', error);
-      res.status(404).json({ error: error.message });
+      console.error('Error al obtener perfil:', error);
+      res.status(500).json({ error: 'Error interno del servidor: ' + error.message });
     }
   },
   
-  // Crear un nuevo usuario
-  async crear(req, res) {
+  // Actualizar solo la contraseña del usuario actual
+  async cambiarContrasena(req, res) {
     try {
-      // Solo un admin puede crear usuarios
-      const usuarioActual = req.usuario;
+      console.log('Usuario cambiando contraseña. ID:', req.usuario.id);
       
-      if (usuarioActual.id !== 1) {
-        return res.status(403).json({ error: 'No tienes permiso para crear usuarios' });
-      }
-      
-      const { username, password } = req.body;
+      const { passwordActual, passwordNueva, confirmarPassword } = req.body;
       
       // Validar datos de entrada
-      if (!username || !password) {
-        return res.status(400).json({ error: 'Se requiere nombre de usuario y contraseña' });
-      }
-      
-      // Validar requisitos de contraseña
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(password)) {
-        return res.status(400).json({
-          error: 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
+      if (!passwordActual || !passwordNueva || !confirmarPassword) {
+        return res.status(400).json({ 
+          error: 'Se requiere contraseña actual, nueva contraseña y confirmación' 
         });
       }
       
-      // Crear usuario
-      const usuario = await Usuario.crear(username, password);
-      res.status(201).json({ usuario });
+      // Verificar que las contraseñas nuevas coincidan
+      if (passwordNueva !== confirmarPassword) {
+        return res.status(400).json({ 
+          error: 'La nueva contraseña y su confirmación no coinciden' 
+        });
+      }
+      
+      // Validar requisitos de la nueva contraseña
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(passwordNueva)) {
+        return res.status(400).json({
+          error: 'La nueva contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
+        });
+      }
+      
+      // Verificar la contraseña actual
+      try {
+        await Usuario.verificarContrasena(req.usuario.id, passwordActual);
+      } catch (error) {
+        return res.status(400).json({ 
+          error: 'La contraseña actual es incorrecta' 
+        });
+      }
+      
+      console.log('Cambiando contraseña...');
+      
+      // Cambiar la contraseña
+      await Usuario.cambiarContrasena(req.usuario.id, passwordNueva);
+      console.log('Contraseña cambiada exitosamente');
+      
+      res.json({ mensaje: 'Contraseña cambiada exitosamente' });
     } catch (error) {
-      console.error('Error al crear usuario:', error);
+      console.error('Error al cambiar contraseña:', error);
       res.status(500).json({ error: error.message });
     }
   },
   
-  // Actualizar un usuario
-  async actualizar(req, res) {
+  // Actualizar información personal (solo nombre de usuario)
+  async actualizarPerfil(req, res) {
     try {
-      // Solo el propio usuario o un admin puede actualizar
-      const usuarioActual = req.usuario;
-      const idSolicitado = parseInt(req.params.id);
+      console.log('Usuario actualizando perfil. ID:', req.usuario.id);
       
-      if (usuarioActual.id !== idSolicitado && usuarioActual.id !== 1) {
-        return res.status(403).json({ error: 'No tienes permiso para actualizar este usuario' });
-      }
-      
-      const { username, password } = req.body;
+      const { username } = req.body;
       
       // Validar datos de entrada
       if (!username) {
-        return res.status(400).json({ error: 'Se requiere nombre de usuario' });
+        return res.status(400).json({ 
+          error: 'Se requiere nombre de usuario' 
+        });
       }
       
-      // Si se proporcionó contraseña, validarla
-      if (password) {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!passwordRegex.test(password)) {
-          return res.status(400).json({
-            error: 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
-          });
-        }
-      }
+      console.log('Actualizando perfil...');
       
-      // Actualizar usuario
-      const usuario = await Usuario.actualizar(idSolicitado, { username, password });
+      // Actualizar solo el nombre de usuario
+      const usuario = await Usuario.actualizarPerfil(req.usuario.id, username);
+      console.log('Perfil actualizado exitosamente');
+      
       res.json({ usuario });
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-      res.status(500).json({ error: error.message });
-    }
-  },
-  
-  // Eliminar un usuario
-  async eliminar(req, res) {
-    try {
-      // Solo un admin puede eliminar usuarios, y no puede eliminarse a sí mismo
-      const usuarioActual = req.usuario;
-      const idSolicitado = parseInt(req.params.id);
-      
-      if (usuarioActual.id !== 1) {
-        return res.status(403).json({ error: 'No tienes permiso para eliminar usuarios' });
-      }
-      
-      if (idSolicitado === 1) {
-        return res.status(400).json({ error: 'No se puede eliminar el usuario administrador' });
-      }
-      
-      await Usuario.eliminar(idSolicitado);
-      res.json({ mensaje: 'Usuario eliminado correctamente' });
-    } catch (error) {
-      console.error('Error al eliminar usuario:', error);
+      console.error('Error al actualizar perfil:', error);
       res.status(500).json({ error: error.message });
     }
   }

@@ -196,6 +196,108 @@ class Usuario {
       });
     });
   }
+
+  // Verificar contraseña actual del usuario
+  static verificarContrasena(id, password) {
+    return new Promise((resolve, reject) => {
+      console.log('Verificando contraseña actual para usuario ID:', id);
+      
+      db.get('SELECT password FROM usuarios WHERE id = ?', [id], (err, usuario) => {
+        if (err) {
+          console.error('Error al buscar usuario para verificar contraseña:', err);
+          return reject(err);
+        }
+        if (!usuario) {
+          console.log('Usuario no encontrado');
+          return reject(new Error('Usuario no encontrado'));
+        }
+
+        console.log('Usuario encontrado, verificando contraseña...');
+        
+        // Comparar la contraseña
+        bcrypt.compare(password, usuario.password, (err, coincide) => {
+          if (err) {
+            console.error('Error al comparar contraseñas:', err);
+            return reject(err);
+          }
+          if (!coincide) {
+            console.log('Contraseña incorrecta');
+            return reject(new Error('Contraseña incorrecta'));
+          }
+          console.log('Contraseña verificada correctamente');
+          resolve(true);
+        });
+      });
+    });
+  }
+
+  // Cambiar contraseña del usuario
+  static cambiarContrasena(id, nuevaPassword) {
+    return new Promise((resolve, reject) => {
+      console.log('Cambiando contraseña para usuario ID:', id);
+      
+      // Encriptar la nueva contraseña
+      bcrypt.hash(nuevaPassword, 10, (err, hash) => {
+        if (err) {
+          console.error('Error al encriptar nueva contraseña:', err);
+          return reject(err);
+        }
+        
+        db.run(
+          'UPDATE usuarios SET password = ? WHERE id = ?',
+          [hash, id],
+          function(err) {
+            if (err) {
+              console.error('Error al actualizar contraseña:', err);
+              return reject(err);
+            }
+            if (this.changes === 0) {
+              console.error('Usuario no encontrado para cambiar contraseña');
+              return reject(new Error('Usuario no encontrado'));
+            }
+            console.log('Contraseña actualizada correctamente');
+            resolve({ actualizado: true });
+          }
+        );
+      });
+    });
+  }
+
+  // Actualizar solo el perfil del usuario (nombre de usuario)
+  static actualizarPerfil(id, username) {
+    return new Promise((resolve, reject) => {
+      console.log(`Actualizando perfil del usuario ID ${id}`);
+      
+      // Verificar si el nuevo nombre de usuario ya existe (excluyendo el usuario actual)
+      db.get('SELECT id FROM usuarios WHERE username = ? AND id != ?', [username, id], (err, row) => {
+        if (err) {
+          console.error('Error al verificar nombre de usuario:', err);
+          return reject(err);
+        }
+        if (row) {
+          console.log('El nombre de usuario ya existe');
+          return reject(new Error('El nombre de usuario ya existe'));
+        }
+        
+        // Actualizar el nombre de usuario
+        db.run(
+          'UPDATE usuarios SET username = ? WHERE id = ?',
+          [username, id],
+          function(err) {
+            if (err) {
+              console.error('Error al actualizar perfil:', err);
+              return reject(err);
+            }
+            if (this.changes === 0) {
+              return reject(new Error('Usuario no encontrado'));
+            }
+            console.log('Perfil actualizado correctamente');
+            resolve({ id, username });
+          }
+        );
+      });
+    });
+  }
 }
 
 module.exports = Usuario;

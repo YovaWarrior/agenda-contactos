@@ -9,14 +9,10 @@ const verificarToken = require('../middleware/auth');
 router.post('/registro', authController.registrar);
 router.post('/login', authController.login);
 
-// Rutas protegidas
+// Rutas protegidas para gestión personal
 router.get('/perfil', verificarToken, authController.perfil);
-
-// Rutas para gestión de usuarios (protegidas)
-router.get('/usuarios', verificarToken, usuariosController.listar);
-router.get('/usuarios/:id', verificarToken, usuariosController.obtener);
-router.post('/usuarios', verificarToken, usuariosController.crear);
-router.put('/usuarios/:id', verificarToken, usuariosController.actualizar);
-router.delete('/usuarios/:id', verificarToken, usuariosController.eliminar);
+router.get('/mi-perfil', verificarToken, usuariosController.obtenerPerfil);
+router.put('/cambiar-contrasena', verificarToken, usuariosController.cambiarContrasena);
+router.put('/actualizar-perfil', verificarToken, usuariosController.actualizarPerfil);
 
 module.exports = router;

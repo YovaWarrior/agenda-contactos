@@ -90,10 +90,10 @@
         
         <div class="maintenance-options">
           <div class="maintenance-card">
-            <h3>Usuarios</h3>
-            <p>Administra los usuarios que pueden acceder a la aplicación.</p>
+            <h3>Mi Perfil</h3>
+            <p>Administra tu información personal y cambia tu contraseña.</p>
             <button id="manage-users-btn" class="btn-primary">
-              <i class="fas fa-users"></i> Gestionar Usuarios
+              <i class="fas fa-user-cog"></i> Gestionar Mi Perfil
             </button>
           </div>
           
@@ -215,11 +215,11 @@
       </div>
     </div>
 
-    <!-- Modal para gestión de usuarios -->
+    <!-- Modal para gestión de perfil personal -->
     <div class="modal" id="users-modal">
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Gestión de Usuarios</h2>
+        <h2>Mi Perfil</h2>
         <div id="users-list-container">
           <table id="users-table">
             <thead>
@@ -230,38 +230,24 @@
               </tr>
             </thead>
             <tbody id="users-list">
-              <!-- Los usuarios se cargarán dinámicamente -->
+              <!-- El perfil se cargará dinámicamente -->
             </tbody>
           </table>
         </div>
-        <button id="add-user-btn" class="btn-primary">
-          <i class="fas fa-user-plus"></i> Añadir Usuario
-        </button>
       </div>
     </div>
 
-    <!-- Modal para añadir/editar usuario -->
+    <!-- Modal para editar perfil -->
     <div class="modal" id="user-form-modal">
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h2 id="user-modal-title">Añadir Usuario</h2>
+        <h2 id="user-modal-title">Editar Mi Perfil</h2>
         <form id="user-form">
           <input type="hidden" id="user-id">
           
           <div class="form-group">
             <label for="user-username">Nombre de Usuario*:</label>
             <input type="text" id="user-username" name="username" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="user-password">Contraseña*:</label>
-            <input type="password" id="user-password" name="password" required>
-            <small>La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y un símbolo.</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="user-confirm-password">Confirmar Contraseña*:</label>
-            <input type="password" id="user-confirm-password" name="confirmPassword" required>
           </div>
           
           <div id="user-error" class="error-message"></div>

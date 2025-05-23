@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const usersModal = document.getElementById('users-modal');
   const userFormModal = document.getElementById('user-form-modal');
   const userForm = document.getElementById('user-form');
-  const addUserBtn = document.getElementById('add-user-btn');
   const usersList = document.getElementById('users-list');
   const cancelUserBtn = document.getElementById('cancel-user-btn');
   const userModalCloseButtons = userFormModal.querySelectorAll('.close');
@@ -77,11 +76,11 @@ async function getUserInfo() {
       console.log('Elemento actualizado:', usernameDisplay.textContent);
     } else {
       console.error('Datos de usuario incompletos:', data);
-      usernameDisplay.textContent = ''; // Dejamos vacío en lugar de mostrar un valor por defecto
+      usernameDisplay.textContent = '';
     }
   } catch (error) {
     console.error('Error al obtener información del usuario:', error);
-    usernameDisplay.textContent = ''; // Dejamos vacío en caso de error
+    usernameDisplay.textContent = '';
     
     // Solo redirigimos al login si es un error de autenticación
     if (error.message.includes('401')) {
@@ -91,6 +90,188 @@ async function getUserInfo() {
     }
   }
 }
+
+  // Cargar información personal del usuario
+  async function loadUserProfile() {
+    try {
+      console.log('Cargando perfil personal...');
+      const response = await fetch('/api/auth/mi-perfil', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error al cargar perfil:', response.status, errorData);
+        throw new Error(errorData.error || 'Error al cargar perfil');
+      }
+
+      const data = await response.json();
+      console.log('Perfil cargado:', data);
+      displayUserProfile(data.usuario);
+    } catch (error) {
+      console.error('Error:', error);
+      usersList.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--danger-color);">Error: ${error.message}</td></tr>`;
+    }
+  }
+
+  // Mostrar perfil del usuario
+  function displayUserProfile(usuario) {
+    usersList.innerHTML = '';
+    
+    const row = document.createElement('tr');
+    const fechaCreacion = new Date(usuario.fecha_creacion).toLocaleDateString();
+    
+    row.innerHTML = `
+      <td>${usuario.username}</td>
+      <td>${fechaCreacion}</td>
+      <td class="user-actions">
+        <button class="edit-profile-btn" title="Editar perfil">
+          <i class="fas fa-user-edit"></i> Editar Perfil
+        </button>
+        <button class="change-password-btn" title="Cambiar contraseña">
+          <i class="fas fa-key"></i> Cambiar Contraseña
+        </button>
+      </td>
+    `;
+    
+    usersList.appendChild(row);
+    
+    // Añadir event listeners a los botones
+    const editProfileBtn = row.querySelector('.edit-profile-btn');
+    const changePasswordBtn = row.querySelector('.change-password-btn');
+    
+    editProfileBtn.addEventListener('click', () => openEditProfileModal(usuario));
+    changePasswordBtn.addEventListener('click', () => openChangePasswordModal());
+  }
+
+  // Abrir modal para editar perfil
+  function openEditProfileModal(usuario) {
+    userForm.reset();
+    userId.value = usuario.id;
+    document.getElementById('user-username').value = usuario.username;
+    userModalTitle.textContent = 'Editar Mi Perfil';
+    userError.textContent = '';
+    
+    userFormModal.style.display = 'block';
+  }
+
+  // Abrir modal para cambiar contraseña
+  function openChangePasswordModal() {
+    // Crear modal específico para cambio de contraseña
+    if (!document.getElementById('change-password-modal')) {
+      createChangePasswordModal();
+    }
+    
+    document.getElementById('change-password-form').reset();
+    document.getElementById('change-password-error').textContent = '';
+    document.getElementById('change-password-modal').style.display = 'block';
+  }
+
+  // Crear modal para cambio de contraseña
+  function createChangePasswordModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'change-password-modal';
+    
+    modal.innerHTML = `
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Cambiar Contraseña</h2>
+        <form id="change-password-form">
+          <div class="form-group">
+            <label for="current-password">Contraseña Actual*:</label>
+            <input type="password" id="current-password" name="currentPassword" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="new-password">Nueva Contraseña*:</label>
+            <input type="password" id="new-password" name="newPassword" required>
+            <small>La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y un símbolo.</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirm-new-password">Confirmar Nueva Contraseña*:</label>
+            <input type="password" id="confirm-new-password" name="confirmNewPassword" required>
+          </div>
+          
+          <div id="change-password-error" class="error-message"></div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="document.getElementById('change-password-modal').style.display = 'none'">Cancelar</button>
+            <button type="submit" class="btn-primary">Cambiar Contraseña</button>
+          </div>
+        </form>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Añadir event listeners
+    modal.querySelector('.close').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+    
+    modal.querySelector('#change-password-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmNewPassword = document.getElementById('confirm-new-password').value;
+      const errorDiv = document.getElementById('change-password-error');
+      
+      // Reiniciar mensaje de error
+      errorDiv.textContent = '';
+      
+      // Validar que las contraseñas coincidan
+      if (newPassword !== confirmNewPassword) {
+        errorDiv.textContent = 'Las nuevas contraseñas no coinciden';
+        return;
+      }
+      
+      // Validar requisitos de la contraseña
+      if (!validarPassword(newPassword)) {
+        errorDiv.textContent = 'La nueva contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo';
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/auth/cambiar-contrasena', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            passwordActual: currentPassword,
+            passwordNueva: newPassword,
+            confirmarPassword: confirmNewPassword
+          })
+        });
+
+        const responseData = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(responseData.error || 'Error al cambiar contraseña');
+        }
+
+        alert('Contraseña cambiada exitosamente');
+        modal.style.display = 'none';
+      } catch (error) {
+        console.error('Error:', error);
+        errorDiv.textContent = error.message;
+      }
+    });
+    
+    // Cerrar modal al hacer clic fuera
+    window.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  }
 
   // Cargar contactos
   async function loadContacts(categoriaId = null, searchTerm = null) {
@@ -116,24 +297,20 @@ async function getUserInfo() {
 
       const data = await response.json();
       displayContacts(data.contactos);
-      return data.contactos; // Devolver los contactos para usarlos en otras funciones
+      return data.contactos;
     } catch (error) {
       console.error('Error:', error);
       contactsList.innerHTML = '<p>Error al cargar contactos</p>';
-      return []; // Devolver array vacío en caso de error
+      return [];
     }
   }
 
   // Obtener el conteo de contactos por categoría
   async function getContactCountsByCategory() {
     try {
-      // Cargamos todos los contactos
       const contactos = await loadContacts();
-      
-      // Creamos un objeto para contar los contactos por categoría
       const counts = {};
       
-      // Contamos los contactos por categoría
       contactos.forEach(contacto => {
         if (contacto.categoria_id && contacto.categoria_nombre) {
           if (!counts[contacto.categoria_id]) {
@@ -149,7 +326,7 @@ async function getUserInfo() {
       return counts;
     } catch (error) {
       console.error('Error al obtener conteo de contactos por categoría:', error);
-      return {}; // Devolver objeto vacío en caso de error
+      return {};
     }
   }
 
@@ -166,7 +343,6 @@ async function getUserInfo() {
       const contactCard = document.createElement('div');
       contactCard.className = 'contact-card';
       
-      // Crear imagen del contacto
       const imageUrl = contacto.ruta_imagen ? `/img/${contacto.ruta_imagen}` : '/img/default-profile.png';
       
       contactCard.innerHTML = `
@@ -187,7 +363,6 @@ async function getUserInfo() {
       
       contactsList.appendChild(contactCard);
       
-      // Añadir event listeners a los botones
       const editBtn = contactCard.querySelector('.edit-btn');
       const deleteBtn = contactCard.querySelector('.delete-btn');
       
@@ -211,11 +386,8 @@ async function getUserInfo() {
       }
 
       const data = await response.json();
-      
-      // Obtener el conteo de contactos por categoría
       const contactCountsByCategory = await getContactCountsByCategory();
       
-      // Mostrar categorías con su conteo correcto
       displayCategories(data.categorias, contactCountsByCategory);
       populateCategoryDropdowns(data.categorias);
     } catch (error) {
@@ -233,19 +405,17 @@ async function getUserInfo() {
       return;
     }
     
-    // Estilo para el contenedor similar al de los contactos
     categoriesList.style.display = 'grid';
     categoriesList.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
     categoriesList.style.gap = '20px';
     categoriesList.style.marginTop = '20px';
     
-    // Colores para las categorías según lo mostrado en la imagen
     const colorMap = {
-      'Amigos': '#e91e63',  // Rosa/Rojo
-      'Familia': '#4caf50',  // Verde
-      'Otros': '#9c27b0',   // Púrpura
-      'Trabajo': '#ff9800',  // Naranja
-      'futbol': '#2196f3'    // Azul (para la nueva categoría que vi en la imagen)
+      'Amigos': '#e91e63',
+      'Familia': '#4caf50',
+      'Otros': '#9c27b0',
+      'Trabajo': '#ff9800',
+      'futbol': '#2196f3'
     };
     
     categorias.forEach(categoria => {
@@ -257,10 +427,7 @@ async function getUserInfo() {
       categoryCard.style.backgroundColor = 'var(--bg-card)';
       categoryCard.style.boxShadow = '0 1px 3px var(--shadow-color)';
       
-      // Obtener color para el punto basado en el nombre de categoría
-      const color = colorMap[categoria.nombre] || '#607d8b'; // Gris como predeterminado
-      
-      // Obtener el conteo de contactos para esta categoría
+      const color = colorMap[categoria.nombre] || '#607d8b';
       const categoryInfo = contactCountsByCategory[categoria.id] || { count: 0 };
       const contactCount = categoryInfo.count;
       
@@ -289,7 +456,6 @@ async function getUserInfo() {
       
       categoriesList.appendChild(categoryCard);
       
-      // Añadir event listeners a los botones
       const editBtn = categoryCard.querySelector('.edit-category-btn');
       const deleteBtn = categoryCard.querySelector('.delete-category-btn');
       
@@ -300,11 +466,9 @@ async function getUserInfo() {
 
   // Poblar los desplegables de categorías
   function populateCategoryDropdowns(categorias) {
-    // Limpiar opciones actuales
     categoriaFilter.innerHTML = '<option value="">Todas las categorías</option>';
     categoriaSelect.innerHTML = '<option value="">Sin categoría</option>';
     
-    // Añadir categorías a los desplegables
     categorias.forEach(categoria => {
       const filterOption = document.createElement('option');
       filterOption.value = categoria.id;
@@ -364,7 +528,6 @@ async function editContact(id) {
     
     const contacto = data.contacto;
     
-    // Verificar que contacto existe y tiene datos
     if (!contacto) {
       console.error('No se recibieron datos del contacto o formato incorrecto:', data);
       throw new Error('No se recibieron datos del contacto');
@@ -372,16 +535,12 @@ async function editContact(id) {
     
     console.log('Datos del contacto recibidos:', contacto);
     
-    // Asegurarnos de abrir el modal antes de intentar actualizar los campos
     openContactModal(true);
     
-    // Dar tiempo para que el DOM se actualice antes de asignar valores
     setTimeout(() => {
       try {
-        // Verificar y asignar a cada campo
         contactId.value = contacto.id;
         
-        // Obtener referencias a los elementos del DOM después de que el modal esté visible
         const nombreElement = document.getElementById('nombre');
         const apellidoElement = document.getElementById('apellido');
         const telefonoElement = document.getElementById('telefono');
@@ -394,7 +553,6 @@ async function editContact(id) {
           emailElement, direccionElement, categoriaElement
         });
         
-        // Asignar valores solo si los elementos existen
         if (nombreElement) {
           nombreElement.value = contacto.nombre || '';
           console.log('Asignado nombre:', nombreElement.value);
@@ -437,7 +595,6 @@ async function editContact(id) {
           console.error('Elemento categoría no encontrado en el DOM');
         }
         
-        // Mostrar imagen actual si existe
         if (contacto.ruta_imagen) {
           imagenPreview.innerHTML = `<img src="/img/${contacto.ruta_imagen}" alt="${contacto.nombre}">`;
           console.log('Imagen asignada');
@@ -450,7 +607,7 @@ async function editContact(id) {
       } catch (err) {
         console.error('Error al asignar valores al formulario:', err);
       }
-    }, 100); // Pequeño retraso para asegurar que el modal está completamente cargado
+    }, 100);
     
   } catch (error) {
     console.error('Error detallado al obtener contacto:', error);
@@ -473,9 +630,7 @@ async function editContact(id) {
           throw new Error('Error al eliminar contacto');
         }
 
-        // Recargar contactos
         loadContacts();
-        // Recargar categorías para actualizar conteos
         loadCategories();
       } catch (error) {
         console.error('Error:', error);
@@ -501,7 +656,6 @@ async function editContact(id) {
       const data = await response.json();
       const categoria = data.categoria;
       
-      // Llenar formulario con datos de la categoría
       categoryId.value = categoria.id;
       document.getElementById('nombre-categoria').value = categoria.nombre;
       
@@ -527,162 +681,11 @@ async function editContact(id) {
           throw new Error('Error al eliminar categoría');
         }
 
-        // Recargar categorías
         loadCategories();
-        // Recargar contactos (por si alguno usaba esta categoría)
         loadContacts();
       } catch (error) {
         console.error('Error:', error);
         alert('Error al eliminar categoría');
-      }
-    }
-  }
-
-  // Cargar usuarios
-  async function loadUsers() {
-    try {
-      const response = await fetch('/api/auth/usuarios', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al cargar usuarios');
-      }
-
-      const data = await response.json();
-      displayUsers(data.usuarios);
-    } catch (error) {
-      console.error('Error:', error);
-      usersList.innerHTML = '<tr><td colspan="3">Error al cargar usuarios</td></tr>';
-    }
-  }
-
-  // Mostrar usuarios en la interfaz
-  function displayUsers(usuarios) {
-    usersList.innerHTML = '';
-    
-    if (usuarios.length === 0) {
-      usersList.innerHTML = '<tr><td colspan="3">No hay usuarios para mostrar</td></tr>';
-      return;
-    }
-    
-    usuarios.forEach(usuario => {
-      const row = document.createElement('tr');
-      const fechaCreacion = new Date(usuario.fecha_creacion).toLocaleDateString();
-      
-      row.innerHTML = `
-        <td>${usuario.username}</td>
-        <td>${fechaCreacion}</td>
-        <td class="user-actions">
-          <button class="edit-user-btn" data-id="${usuario.id}" title="Editar usuario">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button class="delete-user-btn" data-id="${usuario.id}" title="Eliminar usuario">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </td>
-      `;
-      
-      usersList.appendChild(row);
-      
-      // Añadir event listeners a los botones
-      const editBtn = row.querySelector('.edit-user-btn');
-      const deleteBtn = row.querySelector('.delete-user-btn');
-      
-      editBtn.addEventListener('click', () => editUser(usuario.id));
-      deleteBtn.addEventListener('click', () => deleteUser(usuario.id));
-    });
-  }
-
-  // Abrir modal para crear/editar usuario
-  function openUserFormModal(isEdit = false) {
-    userForm.reset();
-    userId.value = '';
-    userModalTitle.textContent = isEdit ? 'Editar Usuario' : 'Añadir Usuario';
-    userError.textContent = '';
-    userFormModal.style.display = 'block';
-    
-    // Si es edición, ocultar los campos de contraseña
-    const passwordField = document.getElementById('user-password');
-    const confirmPasswordField = document.getElementById('user-confirm-password');
-    const passwordLabel = document.querySelector('label[for="user-password"]');
-    const confirmPasswordLabel = document.querySelector('label[for="user-confirm-password"]');
-    const passwordSmall = passwordField.nextElementSibling;
-    
-    if (isEdit) {
-      passwordField.style.display = 'none';
-      confirmPasswordField.style.display = 'none';
-      passwordLabel.style.display = 'none';
-      confirmPasswordLabel.style.display = 'none';
-      passwordSmall.style.display = 'none';
-      
-      // No son requeridos para edición
-      passwordField.required = false;
-      confirmPasswordField.required = false;
-    } else {
-      passwordField.style.display = 'block';
-      confirmPasswordField.style.display = 'block';
-      passwordLabel.style.display = 'block';
-      confirmPasswordLabel.style.display = 'block';
-      passwordSmall.style.display = 'block';
-      
-      // Son requeridos para creación
-      passwordField.required = true;
-      confirmPasswordField.required = true;
-    }
-  }
-
-  // Editar usuario
-  async function editUser(id) {
-    try {
-      const response = await fetch(`/api/auth/usuarios/${id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al obtener usuario');
-      }
-
-      const data = await response.json();
-      const usuario = data.usuario;
-      
-      // Llenar formulario con datos del usuario
-      userId.value = usuario.id;
-      document.getElementById('user-username').value = usuario.username;
-      
-      openUserFormModal(true);
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error al obtener información del usuario');
-    }
-  }
-
-  // Eliminar usuario
-  async function deleteUser(id) {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      try {
-        const response = await fetch(`/api/auth/usuarios/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Error al eliminar usuario');
-        }
-
-        // Recargar usuarios
-        loadUsers();
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error al eliminar usuario');
       }
     }
   }
@@ -692,16 +695,13 @@ async function editContact(id) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // Título
     doc.setFontSize(20);
     doc.text('Agenda de Contactos', 105, 15, { align: 'center' });
     
-    // Subtítulo
     doc.setFontSize(12);
     const fecha = new Date().toLocaleDateString();
     doc.text(`Reporte generado el ${fecha}`, 105, 25, { align: 'center' });
     
-    // Tabla de contactos
     doc.setFontSize(10);
     const headers = [['Nombre', 'Teléfono', 'Email', 'Categoría']];
     
@@ -731,7 +731,6 @@ async function editContact(id) {
       }
     });
     
-    // Pie de página
     const pageCount = doc.internal.getNumberOfPages();
     for(let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -740,16 +739,13 @@ async function editContact(id) {
       doc.text('FESTEC 2025 - Universidad Mariano Gálvez de Puerto Barrios', 105, 295, { align: 'center' });
     }
     
-    // Guardar PDF
     doc.save('agenda_contactos.pdf');
   }
 
   // Función para generar Excel
   function generateExcel(contactos) {
-    // Crear un libro de trabajo
     const wb = XLSX.utils.book_new();
     
-    // Preparar datos
     const data = contactos.map(contacto => ({
       'Nombre': contacto.nombre,
       'Apellido': contacto.apellido || '',
@@ -759,45 +755,31 @@ async function editContact(id) {
       'Categoría': contacto.categoria_nombre || ''
     }));
     
-    // Crear hoja de trabajo
     const ws = XLSX.utils.json_to_sheet(data);
     
-    // Ajustar anchos de columna
     const wscols = [
-      { wch: 15 }, // Nombre
-      { wch: 15 }, // Apellido
-      { wch: 15 }, // Teléfono
-      { wch: 25 }, // Email
-      { wch: 30 }, // Dirección
-      { wch: 15 }  // Categoría
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 15 }
     ];
     
     ws['!cols'] = wscols;
     
-    // Añadir hoja al libro
     XLSX.utils.book_append_sheet(wb, ws, 'Contactos');
     
-    // Guardar archivo
     XLSX.writeFile(wb, 'agenda_contactos.xlsx');
   }
 
   // Validar contraseña
   function validarPassword(password) {
-    // Al menos 8 caracteres
     if (password.length < 8) return false;
-    
-    // Al menos una letra mayúscula
     if (!/[A-Z]/.test(password)) return false;
-    
-    // Al menos una letra minúscula
     if (!/[a-z]/.test(password)) return false;
-    
-    // Al menos un número
     if (!/[0-9]/.test(password)) return false;
-    
-    // Al menos un símbolo
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return false;
-    
     return true;
   }
 
@@ -897,18 +879,16 @@ async function editContact(id) {
     openCategoryModal();
   });
   
-  // Gestión de usuarios
+  // Gestión de perfil personal
   if (manageUsersBtn) {
     manageUsersBtn.addEventListener('click', function() {
-      loadUsers();
+      console.log('Abriendo gestión de perfil personal...');
+      loadUserProfile();
       usersModal.style.display = 'block';
-    });
-  }
-  
-  // Añadir usuario
-  if (addUserBtn) {
-    addUserBtn.addEventListener('click', function() {
-      openUserFormModal();
+      
+      // Cambiar título del modal
+      const modalTitle = usersModal.querySelector('h2');
+      modalTitle.textContent = 'Mi Perfil';
     });
   }
   
@@ -916,10 +896,7 @@ async function editContact(id) {
   if (exportPdfBtn) {
     exportPdfBtn.addEventListener('click', async function() {
       try {
-        // Obtener contactos
         const contactos = await loadContacts();
-        
-        // Crear PDF
         generatePDF(contactos);
       } catch (error) {
         console.error('Error al exportar a PDF:', error);
@@ -932,10 +909,7 @@ async function editContact(id) {
   if (exportExcelBtn) {
     exportExcelBtn.addEventListener('click', async function() {
       try {
-        // Obtener contactos
         const contactos = await loadContacts();
-        
-        // Crear Excel
         generateExcel(contactos);
       } catch (error) {
         console.error('Error al exportar a Excel:', error);
@@ -1035,7 +1009,6 @@ async function editContact(id) {
 
       closeModals();
       loadContacts();
-      // Recargar categorías para actualizar conteos
       loadCategories();
     } catch (error) {
       console.error('Error:', error);
@@ -1070,7 +1043,6 @@ async function editContact(id) {
 
       closeModals();
       loadCategories();
-      // Recargar contactos (por si alguno usaba esta categoría)
       loadContacts();
     } catch (error) {
       console.error('Error:', error);
@@ -1078,64 +1050,38 @@ async function editContact(id) {
     }
   });
   
-  // Guardar usuario
+  // Guardar perfil de usuario
   userForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const username = document.getElementById('user-username').value;
-    const password = document.getElementById('user-password').value;
-    const confirmPassword = document.getElementById('user-confirm-password').value;
-    const id = userId.value;
-    const isEdit = !!id;
     
     // Reiniciar mensaje de error
     userError.textContent = '';
     
-    // Validaciones para creación de usuario
-    if (!isEdit) {
-      // Validar que las contraseñas coincidan
-      if (password !== confirmPassword) {
-        userError.textContent = 'Las contraseñas no coinciden';
-        return;
-      }
-      
-      // Validar requisitos de la contraseña
-      if (!validarPassword(password)) {
-        userError.textContent = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo';
-        return;
-      }
-    }
-    
     try {
-      const url = isEdit ? `/api/auth/usuarios/${id}` : '/api/auth/usuarios';
-      const method = isEdit ? 'PUT' : 'POST';
-      
-      const data = {
-        username
-      };
-      
-      // Añadir contraseña solo si no es edición
-      if (!isEdit) {
-        data.password = password;
-      }
-      
-      const response = await fetch(url, {
-        method: method,
+      const response = await fetch('/api/auth/actualizar-perfil', {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ username })
       });
 
       const responseData = await response.json();
       
       if (!response.ok) {
-        throw new Error(responseData.error || `Error al ${isEdit ? 'actualizar' : 'crear'} usuario`);
+        throw new Error(responseData.error || 'Error al actualizar perfil');
       }
 
       userFormModal.style.display = 'none';
-      loadUsers();
+      loadUserProfile();
+      
+      // Actualizar el nombre mostrado en el header
+      usernameDisplay.textContent = username;
+      
+      alert('Perfil actualizado exitosamente');
     } catch (error) {
       console.error('Error:', error);
       userError.textContent = error.message;
