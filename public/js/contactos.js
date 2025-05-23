@@ -11,9 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const logoutBtn = document.getElementById('logout-btn');
   const menuContactos = document.getElementById('menu-contactos');
   const menuCategorias = document.getElementById('menu-categorias');
+  const menuMantenimiento = document.getElementById('menu-mantenimiento');
   const menuAyuda = document.getElementById('menu-ayuda');
   const contactosSection = document.getElementById('contactos-section');
   const categoriasSection = document.getElementById('categorias-section');
+  const mantenimientoSection = document.getElementById('mantenimiento-section');
   const ayudaSection = document.getElementById('ayuda-section');
   const contactsList = document.getElementById('contacts-list');
   const categoriesList = document.getElementById('categories-list');
@@ -36,6 +38,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const imagenInput = document.getElementById('imagen');
   const imagenPreview = document.getElementById('imagen-preview');
   const categoriaSelect = document.getElementById('categoria');
+  const manageUsersBtn = document.getElementById('manage-users-btn');
+  const exportPdfBtn = document.getElementById('export-pdf-btn');
+  const exportExcelBtn = document.getElementById('export-excel-btn');
+  const usersModal = document.getElementById('users-modal');
+  const userFormModal = document.getElementById('user-form-modal');
+  const userForm = document.getElementById('user-form');
+  const addUserBtn = document.getElementById('add-user-btn');
+  const usersList = document.getElementById('users-list');
+  const cancelUserBtn = document.getElementById('cancel-user-btn');
+  const userModalCloseButtons = userFormModal.querySelectorAll('.close');
+  const usersModalCloseButtons = usersModal.querySelectorAll('.close');
+  const userId = document.getElementById('user-id');
+  const userModalTitle = document.getElementById('user-modal-title');
+  const userError = document.getElementById('user-error');
 
 // Obtener información del usuario y mostrar nombre
 async function getUserInfo() {
@@ -323,6 +339,8 @@ async function getUserInfo() {
   function closeModals() {
     contactModal.style.display = 'none';
     categoryModal.style.display = 'none';
+    usersModal.style.display = 'none';
+    userFormModal.style.display = 'none';
   }
 
   // Editar contacto
@@ -520,6 +538,269 @@ async function editContact(id) {
     }
   }
 
+  // Cargar usuarios
+  async function loadUsers() {
+    try {
+      const response = await fetch('/api/auth/usuarios', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar usuarios');
+      }
+
+      const data = await response.json();
+      displayUsers(data.usuarios);
+    } catch (error) {
+      console.error('Error:', error);
+      usersList.innerHTML = '<tr><td colspan="3">Error al cargar usuarios</td></tr>';
+    }
+  }
+
+  // Mostrar usuarios en la interfaz
+  function displayUsers(usuarios) {
+    usersList.innerHTML = '';
+    
+    if (usuarios.length === 0) {
+      usersList.innerHTML = '<tr><td colspan="3">No hay usuarios para mostrar</td></tr>';
+      return;
+    }
+    
+    usuarios.forEach(usuario => {
+      const row = document.createElement('tr');
+      const fechaCreacion = new Date(usuario.fecha_creacion).toLocaleDateString();
+      
+      row.innerHTML = `
+        <td>${usuario.username}</td>
+        <td>${fechaCreacion}</td>
+        <td class="user-actions">
+          <button class="edit-user-btn" data-id="${usuario.id}" title="Editar usuario">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="delete-user-btn" data-id="${usuario.id}" title="Eliminar usuario">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      `;
+      
+      usersList.appendChild(row);
+      
+      // Añadir event listeners a los botones
+      const editBtn = row.querySelector('.edit-user-btn');
+      const deleteBtn = row.querySelector('.delete-user-btn');
+      
+      editBtn.addEventListener('click', () => editUser(usuario.id));
+      deleteBtn.addEventListener('click', () => deleteUser(usuario.id));
+    });
+  }
+
+  // Abrir modal para crear/editar usuario
+  function openUserFormModal(isEdit = false) {
+    userForm.reset();
+    userId.value = '';
+    userModalTitle.textContent = isEdit ? 'Editar Usuario' : 'Añadir Usuario';
+    userError.textContent = '';
+    userFormModal.style.display = 'block';
+    
+    // Si es edición, ocultar los campos de contraseña
+    const passwordField = document.getElementById('user-password');
+    const confirmPasswordField = document.getElementById('user-confirm-password');
+    const passwordLabel = document.querySelector('label[for="user-password"]');
+    const confirmPasswordLabel = document.querySelector('label[for="user-confirm-password"]');
+    const passwordSmall = passwordField.nextElementSibling;
+    
+    if (isEdit) {
+      passwordField.style.display = 'none';
+      confirmPasswordField.style.display = 'none';
+      passwordLabel.style.display = 'none';
+      confirmPasswordLabel.style.display = 'none';
+      passwordSmall.style.display = 'none';
+      
+      // No son requeridos para edición
+      passwordField.required = false;
+      confirmPasswordField.required = false;
+    } else {
+      passwordField.style.display = 'block';
+      confirmPasswordField.style.display = 'block';
+      passwordLabel.style.display = 'block';
+      confirmPasswordLabel.style.display = 'block';
+      passwordSmall.style.display = 'block';
+      
+      // Son requeridos para creación
+      passwordField.required = true;
+      confirmPasswordField.required = true;
+    }
+  }
+
+  // Editar usuario
+  async function editUser(id) {
+    try {
+      const response = await fetch(`/api/auth/usuarios/${id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener usuario');
+      }
+
+      const data = await response.json();
+      const usuario = data.usuario;
+      
+      // Llenar formulario con datos del usuario
+      userId.value = usuario.id;
+      document.getElementById('user-username').value = usuario.username;
+      
+      openUserFormModal(true);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al obtener información del usuario');
+    }
+  }
+
+  // Eliminar usuario
+  async function deleteUser(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+      try {
+        const response = await fetch(`/api/auth/usuarios/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar usuario');
+        }
+
+        // Recargar usuarios
+        loadUsers();
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar usuario');
+      }
+    }
+  }
+
+  // Función para generar PDF
+  function generatePDF(contactos) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Título
+    doc.setFontSize(20);
+    doc.text('Agenda de Contactos', 105, 15, { align: 'center' });
+    
+    // Subtítulo
+    doc.setFontSize(12);
+    const fecha = new Date().toLocaleDateString();
+    doc.text(`Reporte generado el ${fecha}`, 105, 25, { align: 'center' });
+    
+    // Tabla de contactos
+    doc.setFontSize(10);
+    const headers = [['Nombre', 'Teléfono', 'Email', 'Categoría']];
+    
+    const data = contactos.map(contacto => [
+      `${contacto.nombre} ${contacto.apellido || ''}`,
+      contacto.telefono,
+      contacto.email || '-',
+      contacto.categoria_nombre || '-'
+    ]);
+    
+    doc.autoTable({
+      head: headers,
+      body: data,
+      startY: 35,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 3
+      },
+      headStyles: {
+        fillColor: [2, 106, 167],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240]
+      }
+    });
+    
+    // Pie de página
+    const pageCount = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+      doc.text('FESTEC 2025 - Universidad Mariano Gálvez de Puerto Barrios', 105, 295, { align: 'center' });
+    }
+    
+    // Guardar PDF
+    doc.save('agenda_contactos.pdf');
+  }
+
+  // Función para generar Excel
+  function generateExcel(contactos) {
+    // Crear un libro de trabajo
+    const wb = XLSX.utils.book_new();
+    
+    // Preparar datos
+    const data = contactos.map(contacto => ({
+      'Nombre': contacto.nombre,
+      'Apellido': contacto.apellido || '',
+      'Teléfono': contacto.telefono,
+      'Email': contacto.email || '',
+      'Dirección': contacto.direccion || '',
+      'Categoría': contacto.categoria_nombre || ''
+    }));
+    
+    // Crear hoja de trabajo
+    const ws = XLSX.utils.json_to_sheet(data);
+    
+    // Ajustar anchos de columna
+    const wscols = [
+      { wch: 15 }, // Nombre
+      { wch: 15 }, // Apellido
+      { wch: 15 }, // Teléfono
+      { wch: 25 }, // Email
+      { wch: 30 }, // Dirección
+      { wch: 15 }  // Categoría
+    ];
+    
+    ws['!cols'] = wscols;
+    
+    // Añadir hoja al libro
+    XLSX.utils.book_append_sheet(wb, ws, 'Contactos');
+    
+    // Guardar archivo
+    XLSX.writeFile(wb, 'agenda_contactos.xlsx');
+  }
+
+  // Validar contraseña
+  function validarPassword(password) {
+    // Al menos 8 caracteres
+    if (password.length < 8) return false;
+    
+    // Al menos una letra mayúscula
+    if (!/[A-Z]/.test(password)) return false;
+    
+    // Al menos una letra minúscula
+    if (!/[a-z]/.test(password)) return false;
+    
+    // Al menos un número
+    if (!/[0-9]/.test(password)) return false;
+    
+    // Al menos un símbolo
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return false;
+    
+    return true;
+  }
+
   // Event Listeners
   
   // Cambio entre secciones
@@ -528,10 +809,12 @@ async function editContact(id) {
     
     contactosSection.style.display = 'block';
     categoriasSection.style.display = 'none';
+    mantenimientoSection.style.display = 'none';
     ayudaSection.style.display = 'none';
     
     menuContactos.classList.add('active');
     menuCategorias.classList.remove('active');
+    menuMantenimiento.classList.remove('active');
     menuAyuda.classList.remove('active');
     
     loadContacts();
@@ -542,13 +825,29 @@ async function editContact(id) {
     
     contactosSection.style.display = 'none';
     categoriasSection.style.display = 'block';
+    mantenimientoSection.style.display = 'none';
     ayudaSection.style.display = 'none';
     
     menuContactos.classList.remove('active');
     menuCategorias.classList.add('active');
+    menuMantenimiento.classList.remove('active');
     menuAyuda.classList.remove('active');
     
     loadCategories();
+  });
+  
+  menuMantenimiento.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    contactosSection.style.display = 'none';
+    categoriasSection.style.display = 'none';
+    mantenimientoSection.style.display = 'block';
+    ayudaSection.style.display = 'none';
+    
+    menuContactos.classList.remove('active');
+    menuCategorias.classList.remove('active');
+    menuMantenimiento.classList.add('active');
+    menuAyuda.classList.remove('active');
   });
   
   menuAyuda.addEventListener('click', function(e) {
@@ -556,10 +855,12 @@ async function editContact(id) {
     
     contactosSection.style.display = 'none';
     categoriasSection.style.display = 'none';
+    mantenimientoSection.style.display = 'none';
     ayudaSection.style.display = 'block';
     
     menuContactos.classList.remove('active');
     menuCategorias.classList.remove('active');
+    menuMantenimiento.classList.remove('active');
     menuAyuda.classList.add('active');
   });
   
@@ -596,13 +897,78 @@ async function editContact(id) {
     openCategoryModal();
   });
   
+  // Gestión de usuarios
+  if (manageUsersBtn) {
+    manageUsersBtn.addEventListener('click', function() {
+      loadUsers();
+      usersModal.style.display = 'block';
+    });
+  }
+  
+  // Añadir usuario
+  if (addUserBtn) {
+    addUserBtn.addEventListener('click', function() {
+      openUserFormModal();
+    });
+  }
+  
+  // Exportar a PDF
+  if (exportPdfBtn) {
+    exportPdfBtn.addEventListener('click', async function() {
+      try {
+        // Obtener contactos
+        const contactos = await loadContacts();
+        
+        // Crear PDF
+        generatePDF(contactos);
+      } catch (error) {
+        console.error('Error al exportar a PDF:', error);
+        alert('Error al exportar contactos a PDF');
+      }
+    });
+  }
+  
+  // Exportar a Excel
+  if (exportExcelBtn) {
+    exportExcelBtn.addEventListener('click', async function() {
+      try {
+        // Obtener contactos
+        const contactos = await loadContacts();
+        
+        // Crear Excel
+        generateExcel(contactos);
+      } catch (error) {
+        console.error('Error al exportar a Excel:', error);
+        alert('Error al exportar contactos a Excel');
+      }
+    });
+  }
+  
   // Cerrar modales
   modalCloseButtons.forEach(button => {
     button.addEventListener('click', closeModals);
   });
   
+  usersModalCloseButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      usersModal.style.display = 'none';
+    });
+  });
+  
+  userModalCloseButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      userFormModal.style.display = 'none';
+    });
+  });
+  
   cancelBtn.addEventListener('click', closeModals);
   cancelCategoryBtn.addEventListener('click', closeModals);
+  
+  if (cancelUserBtn) {
+    cancelUserBtn.addEventListener('click', function() {
+      userFormModal.style.display = 'none';
+    });
+  }
   
   // Cerrar modales al hacer clic fuera
   window.addEventListener('click', function(e) {
@@ -611,6 +977,12 @@ async function editContact(id) {
     }
     if (e.target === categoryModal) {
       categoryModal.style.display = 'none';
+    }
+    if (e.target === usersModal) {
+      usersModal.style.display = 'none';
+    }
+    if (e.target === userFormModal) {
+      userFormModal.style.display = 'none';
     }
   });
   
@@ -703,6 +1075,70 @@ async function editContact(id) {
     } catch (error) {
       console.error('Error:', error);
       alert(`Error al ${isEdit ? 'actualizar' : 'crear'} categoría`);
+    }
+  });
+  
+  // Guardar usuario
+  userForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('user-username').value;
+    const password = document.getElementById('user-password').value;
+    const confirmPassword = document.getElementById('user-confirm-password').value;
+    const id = userId.value;
+    const isEdit = !!id;
+    
+    // Reiniciar mensaje de error
+    userError.textContent = '';
+    
+    // Validaciones para creación de usuario
+    if (!isEdit) {
+      // Validar que las contraseñas coincidan
+      if (password !== confirmPassword) {
+        userError.textContent = 'Las contraseñas no coinciden';
+        return;
+      }
+      
+      // Validar requisitos de la contraseña
+      if (!validarPassword(password)) {
+        userError.textContent = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo';
+        return;
+      }
+    }
+    
+    try {
+      const url = isEdit ? `/api/auth/usuarios/${id}` : '/api/auth/usuarios';
+      const method = isEdit ? 'PUT' : 'POST';
+      
+      const data = {
+        username
+      };
+      
+      // Añadir contraseña solo si no es edición
+      if (!isEdit) {
+        data.password = password;
+      }
+      
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || `Error al ${isEdit ? 'actualizar' : 'crear'} usuario`);
+      }
+
+      userFormModal.style.display = 'none';
+      loadUsers();
+    } catch (error) {
+      console.error('Error:', error);
+      userError.textContent = error.message;
     }
   });
   
