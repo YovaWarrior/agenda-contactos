@@ -1,4 +1,3 @@
-// src/models/usuario.js
 const db = require('../db/database');
 const bcrypt = require('bcrypt');
 

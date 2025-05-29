@@ -5,7 +5,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'carlosmartinezcrl7@gmail.com',
-    pass: 'ootg bcai ybuz chqf' // Reemplaza con tu contraseña de aplicación
+    pass: 'ootg bcai ybuz chqf' 
   }
 });
 
@@ -14,7 +14,7 @@ const enviarNotificacionContacto = async (email, nombre, usuarioNombre) => {
   if (!email) return { enviado: false, mensaje: 'No se proporcionó email' }; 
   
   try {
-    // Plantilla HTML mejorada con información de FreeBSD, Haiku OS, FESTEC y la Universidad
+    
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="es">
@@ -235,7 +235,7 @@ const enviarNotificacionContacto = async (email, nombre, usuarioNombre) => {
             <div class="festec-info">
               <h3>FESTEC 2025</h3>
               <p>Agradecemos a todos los asistentes al Festival Tecnológico (FESTEC) 2025. Esperamos que hayan disfrutado de todas las exposiciones y proyectos presentados.</p>
-              <p>Fecha: 20 de Mayo, 2025 | Ubicación: Campus Central</p>
+              <p>Fecha: 31 de Mayo, 2025 | Ubicación: Comando Naval Santo Tomas de Castilla</p>
             </div>
             
             <div class="university-section">

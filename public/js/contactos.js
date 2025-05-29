@@ -53,10 +53,178 @@ document.addEventListener('DOMContentLoaded', function() {
   const userError = document.getElementById('user-error');
   const saveBtn = document.getElementById('save-btn');
   const saveCategoryBtn = document.getElementById('save-category-btn');
+  const emailInput = document.getElementById('email');
 
   // Variables para controlar el estado de guardado
   let isSubmittingContact = false;
   let isSubmittingCategory = false;
+
+// Función para validar email con expresión regular 
+function validarEmailEstructura(email) {
+  if (!email || email.trim() === '') {
+    return { valido: true, error: null }; 
+  }
+  
+  // Limpiar email
+  email = email.trim().toLowerCase();
+  
+  // Expresión regular más estricta para emails
+  const emailRegex = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$/;
+  
+  if (!emailRegex.test(email)) {
+    return { valido: false, error: 'El formato del email no es válido' };
+  }
+  
+  // Validaciones adicionales
+  if (email.length > 254) {
+    return { valido: false, error: 'El email es demasiado largo (máximo 254 caracteres)' };
+  }
+  
+  const [localPart, domain] = email.split('@');
+  
+  if (localPart.length > 64) {
+    return { valido: false, error: 'La parte local del email es demasiado larga (máximo 64 caracteres)' };
+  }
+  
+  // Verificar que no empiece o termine con punto
+  if (localPart.startsWith('.') || localPart.endsWith('.')) {
+    return { valido: false, error: 'El email no puede empezar o terminar con punto' };
+  }
+  
+  // Verificar que no tenga puntos consecutivos
+  if (localPart.includes('..')) {
+    return { valido: false, error: 'El email no puede tener puntos consecutivos' };
+  }
+  
+  // Verificar dominios obvios inválidos
+  const dominiosInvalidos = [
+    'test.com', 'example.com', 'test.test', 'fake.com', 'invalid.com',
+    'nomail.com', 'temp.com', 'dummy.com', 'sample.com', 'demo.com'
+  ];
+  
+  if (dominiosInvalidos.includes(domain)) {
+    return { valido: false, error: 'Por favor ingresa un email real y válido' };
+  }
+  
+  return { valido: true, error: null };
+}
+
+// Función para validar dominios conocidos
+function validarDominioConocido(email) {
+  if (!email || email.trim() === '') {
+    return { valido: true, error: null };
+  }
+  
+  const domain = email.trim().toLowerCase().split('@')[1];
+  
+  if (!domain) {
+    return { valido: false, error: 'Formato de email inválido' };
+  }
+  
+  // Lista de dominios conocidos y populares
+  const dominiosConocidos = [
+    // Principales proveedores
+    'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'live.com',
+    'icloud.com', 'me.com', 'mac.com', 'aol.com', 'protonmail.com',
+    
+    // Educativos y empresariales
+    'edu', 'edu.gt', 'usac.edu.gt', 'url.edu.gt', 'unis.edu.gt',
+    'umg.edu.gt', 'ufm.edu.gt', 'upana.edu.gt',
+    
+    // Empresariales guatemaltecos
+    'bancoindustrial.com', 'bam.com.gt', 'banrural.com.gt',
+    'tigo.com.gt', 'claro.com.gt', 'movistar.com.gt',
+    
+    // Dominios de trabajo comunes
+    'company.com', 'corp.com', 'work.com', 'office.com',
+    
+    // Otros populares
+    'zoho.com', 'yandex.com', 'mail.com', 'gmx.com'
+  ];
+  
+  // Verificar si el dominio o TLD es conocido
+  const esConocido = dominiosConocidos.some(dominio => 
+    domain === dominio || domain.endsWith('.' + dominio)
+  );
+  
+  // Verificar TLDs comunes
+  const tldComunes = [
+    'com', 'org', 'net', 'edu', 'gov', 'mil', 'int',
+    'gt', 'es', 'mx', 'co', 'uk', 'ca', 'de', 'fr', 'it',
+    'com.gt', 'org.gt', 'net.gt', 'edu.gt', 'gob.gt'
+  ];
+  
+  const tieneTldComun = tldComunes.some(tld => domain.endsWith('.' + tld));
+  
+  if (!esConocido && !tieneTldComun) {
+    return { 
+      valido: false, 
+      error: 'Por favor ingresa un email con un dominio válido y reconocido (ej: gmail.com, yahoo.com, etc.)' 
+    };
+  }
+  
+  return { valido: true, error: null };
+}
+
+// Función para validar el email completo
+function validarEmailCompleto(email) {
+  if (!email || email.trim() === '') {
+    return { valido: true, error: null }; 
+  }
+  
+  // Validar estructura
+  const validacionEstructura = validarEmailEstructura(email);
+  if (!validacionEstructura.valido) {
+    return validacionEstructura;
+  }
+  
+  // Validar dominio conocido
+  const validacionDominio = validarDominioConocido(email);
+  if (!validacionDominio.valido) {
+    return validacionDominio;
+  }
+  
+  return { valido: true, error: null };
+}
+
+// Función para mostrar error de validación de email
+function mostrarErrorEmail(mensaje) {
+  // Remover error anterior si existe
+  const errorAnterior = document.getElementById('email-error');
+  if (errorAnterior) {
+    errorAnterior.remove();
+  }
+  
+  // Crear nuevo elemento de error
+  const errorDiv = document.createElement('div');
+  errorDiv.id = 'email-error';
+  errorDiv.className = 'error-message';
+  errorDiv.style.cssText = `
+    color: var(--danger-color);
+    font-size: 12px;
+    margin-top: 5px;
+    padding: 8px;
+    background-color: rgba(235, 90, 70, 0.1);
+    border: 1px solid var(--danger-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+  `;
+  errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>${mensaje}`;
+  
+  // Insertar después del campo de email
+  if (emailInput && emailInput.parentNode) {
+    emailInput.parentNode.insertAdjacentElement('afterend', errorDiv);
+  }
+}
+
+// Función para limpiar error de email
+function limpiarErrorEmail() {
+  const errorDiv = document.getElementById('email-error');
+  if (errorDiv) {
+    errorDiv.remove();
+  }
+}
 
 // Función para alternar visibilidad de contraseña
 function togglePassword(inputId) {
@@ -546,6 +714,9 @@ async function getUserInfo() {
     contactId.value = '';
     modalTitle.textContent = isEdit ? 'Editar Contacto' : 'Añadir Contacto';
     
+    // Limpiar errores de email
+    limpiarErrorEmail();
+    
     // Resetear estado del botón
     if (saveBtn) {
       toggleButtonState(saveBtn, false, 'Guardar', 'Guardando...');
@@ -574,6 +745,9 @@ async function getUserInfo() {
     categoryModal.style.display = 'none';
     usersModal.style.display = 'none';
     userFormModal.style.display = 'none';
+    
+    // Limpiar errores de email
+    limpiarErrorEmail();
     
     // Resetear estados de botones al cerrar
     isSubmittingContact = false;
@@ -865,6 +1039,52 @@ async function editContact(id) {
 
   // Event Listeners
   
+  // Validación en tiempo real del email
+  if (emailInput) {
+    emailInput.addEventListener('blur', function() {
+      const email = this.value.trim();
+      
+      // Limpiar error anterior
+      limpiarErrorEmail();
+      
+      if (email) {
+        const validacion = validarEmailCompleto(email);
+        if (!validacion.valido) {
+          mostrarErrorEmail(validacion.error);
+          this.style.borderColor = 'var(--danger-color)';
+        } else {
+          this.style.borderColor = 'var(--success-color)';
+          // Crear indicador de éxito temporal
+          const successDiv = document.createElement('div');
+          successDiv.style.cssText = `
+            color: var(--success-color);
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+          `;
+          successDiv.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 8px;"></i>Email válido';
+          this.parentNode.insertAdjacentElement('afterend', successDiv);
+          
+          // Remover el indicador después de 3 segundos
+          setTimeout(() => {
+            if (successDiv.parentNode) {
+              successDiv.remove();
+            }
+          }, 3000);
+        }
+      } else {
+        this.style.borderColor = 'var(--border-color)';
+      }
+    });
+    
+    // Limpiar estilos al enfocar
+    emailInput.addEventListener('focus', function() {
+      limpiarErrorEmail();
+      this.style.borderColor = 'var(--primary-light)';
+    });
+  }
+  
   // Cambio entre secciones
   menuContactos.addEventListener('click', function(e) {
     e.preventDefault();
@@ -1052,7 +1272,7 @@ async function editContact(id) {
     }
   });
   
-  // Guardar contacto - CON PREVENCIÓN DE DUPLICADOS
+  // Guardar contacto - CON PREVENCIÓN DE DUPLICADOS Y VALIDACIÓN DE EMAIL
   contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -1060,6 +1280,16 @@ async function editContact(id) {
     if (isSubmittingContact) {
       console.log('Ya se está procesando un contacto, ignorando envío adicional');
       return;
+    }
+    
+    // Validar email antes de enviar
+    const emailValue = document.getElementById('email').value.trim();
+    if (emailValue) {
+      const validacionEmail = validarEmailCompleto(emailValue);
+      if (!validacionEmail.valido) {
+        mostrarErrorEmail(validacionEmail.error);
+        return;
+      }
     }
     
     isSubmittingContact = true;
@@ -1073,7 +1303,7 @@ async function editContact(id) {
     formData.append('nombre', document.getElementById('nombre').value);
     formData.append('apellido', document.getElementById('apellido').value);
     formData.append('telefono', document.getElementById('telefono').value);
-    formData.append('email', document.getElementById('email').value);
+    formData.append('email', emailValue);
     formData.append('direccion', document.getElementById('direccion').value);
     formData.append('categoria_id', document.getElementById('categoria').value);
     

@@ -20,7 +20,7 @@ const authController = {
       
       console.log('Validando contraseña en backend:', password);
       
-      // Validar requisitos de contraseña - VERSIÓN MEJORADA
+      // Validar requisitos de contraseña 
       const passwordValidation = validatePassword(password);
       if (!passwordValidation.isValid) {
         console.log('Contraseña no cumple requisitos:', passwordValidation.errors);
@@ -108,7 +108,7 @@ const authController = {
   }
 };
 
-// Función para validar contraseña - VERSIÓN MEJORADA
+// Función para validar contraseña 
 function validatePassword(password) {
   console.log('Validando contraseña en backend:', password);
   console.log('Longitud de contraseña:', password.length);

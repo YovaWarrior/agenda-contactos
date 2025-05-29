@@ -1,4 +1,3 @@
-// src/controllers/usuariosController.js - Solo gestión personal
 const Usuario = require('../models/usuario');
 const bcrypt = require('bcrypt');
 

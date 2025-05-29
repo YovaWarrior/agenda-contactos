@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Validar contraseña - FUNCIÓN MEJORADA
+  // Validar contraseña 
   function validarPassword(password) {
     console.log('Validando contraseña:', password);
     console.log('Longitud:', password.length);
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return { valida: false, error: 'La contraseña debe contener al menos un número' };
     }
     
-    // Al menos un símbolo - EXPRESIÓN REGULAR MEJORADA
+    // Al menos un símbolo 
     const symbolRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/;
     if (!symbolRegex.test(password)) {
       console.log('Falla: no tiene símbolo válido');
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return analisis;
   }
 
-  // Crear el indicador de fortaleza de contraseña elegante (SIN SOBREPOSICIÓN)
+  // Crear el indicador de fortaleza de contraseña
   function createPasswordStrengthIndicator() {
     const indicator = document.createElement('div');
     indicator.id = 'password-strength-indicator';
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     `;
     
-    // Agregar estilos para los requisitos (sin sobreposición)
+    // Agregar estilos para los requisitos 
     const style = document.createElement('style');
     style.textContent = `
       .requirement {
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // Validar requisitos de la contraseña - CON LOGGING DETALLADO
+      // Validar requisitos de la contraseña 
       const validacionPassword = validarPassword(password);
       if (!validacionPassword.valida) {
         console.log('Validación de contraseña falló:', validacionPassword.error);

@@ -184,7 +184,7 @@ small {
   background: var(--menu-hover);
 }
 
-/* Estilos mejorados para el indicador de fortaleza de contraseña */
+/* Estilos para el indicador de fortaleza de contraseña */
 #password-strength-indicator {
   display: none;
   margin-top: 12px;
