@@ -16,6 +16,27 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
+  // Función para alternar visibilidad de contraseña
+  function togglePassword(inputId) {
+  const passwordInput = document.getElementById(inputId);
+  const eyeIcon = document.getElementById(inputId + '-eye');
+  
+  if (passwordInput && eyeIcon) {
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeIcon.classList.remove('fa-eye');
+      eyeIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      eyeIcon.classList.remove('fa-eye-slash');
+      eyeIcon.classList.add('fa-eye');
+    }
+  }
+}
+
+  // Hacer la función global para que pueda ser llamada desde HTML
+  window.togglePassword = togglePassword;
+
   // Mostrar formulario de registro
   if (registerLink) {
     registerLink.addEventListener('click', function(e) {

@@ -370,6 +370,44 @@ header h1 {
   object-fit: cover;
 }
 
+/* Estilos para el contenedor de contraseña con ojito */
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  padding-right: 45px; /* Espacio para el botón del ojo */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 16px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  margin: 0;
+}
+
+.password-toggle:hover {
+  color: var(--primary-light);
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: var(--primary-light);
+}
+
 /* Estilos para botones */
 .btn-primary, .btn-secondary {
   padding: 8px 16px;

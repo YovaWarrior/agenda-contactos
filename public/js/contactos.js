@@ -52,6 +52,27 @@ document.addEventListener('DOMContentLoaded', function() {
   const userModalTitle = document.getElementById('user-modal-title');
   const userError = document.getElementById('user-error');
 
+// Función para alternar visibilidad de contraseña
+function togglePassword(inputId) {
+  const passwordInput = document.getElementById(inputId);
+  const eyeIcon = document.getElementById(inputId + '-eye');
+  
+  if (passwordInput && eyeIcon) {
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeIcon.classList.remove('fa-eye');
+      eyeIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      eyeIcon.classList.remove('fa-eye-slash');
+      eyeIcon.classList.add('fa-eye');
+    }
+  }
+}
+
+// Hacer la función global para que pueda ser llamada desde HTML dinámico
+window.togglePassword = togglePassword;
+
 // Obtener información del usuario y mostrar nombre
 async function getUserInfo() {
   try {
@@ -183,18 +204,33 @@ async function getUserInfo() {
         <form id="change-password-form">
           <div class="form-group">
             <label for="current-password">Contraseña Actual*:</label>
-            <input type="password" id="current-password" name="currentPassword" required>
+            <div class="password-container">
+              <input type="password" id="current-password" name="currentPassword" required>
+              <button type="button" class="password-toggle" onclick="togglePassword('current-password')">
+                <i class="fas fa-eye" id="current-password-eye"></i>
+              </button>
+            </div>
           </div>
           
           <div class="form-group">
             <label for="new-password">Nueva Contraseña*:</label>
-            <input type="password" id="new-password" name="newPassword" required>
+            <div class="password-container">
+              <input type="password" id="new-password" name="newPassword" required>
+              <button type="button" class="password-toggle" onclick="togglePassword('new-password')">
+                <i class="fas fa-eye" id="new-password-eye"></i>
+              </button>
+            </div>
             <small>La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y un símbolo.</small>
           </div>
           
           <div class="form-group">
             <label for="confirm-new-password">Confirmar Nueva Contraseña*:</label>
-            <input type="password" id="confirm-new-password" name="confirmNewPassword" required>
+            <div class="password-container">
+              <input type="password" id="confirm-new-password" name="confirmNewPassword" required>
+              <button type="button" class="password-toggle" onclick="togglePassword('confirm-new-password')">
+                <i class="fas fa-eye" id="confirm-new-password-eye"></i>
+              </button>
+            </div>
           </div>
           
           <div id="change-password-error" class="error-message"></div>
