@@ -51,6 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const userId = document.getElementById('user-id');
   const userModalTitle = document.getElementById('user-modal-title');
   const userError = document.getElementById('user-error');
+  const saveBtn = document.getElementById('save-btn');
+  const saveCategoryBtn = document.getElementById('save-category-btn');
+
+  // Variables para controlar el estado de guardado
+  let isSubmittingContact = false;
+  let isSubmittingCategory = false;
 
 // Función para alternar visibilidad de contraseña
 function togglePassword(inputId) {
@@ -72,6 +78,21 @@ function togglePassword(inputId) {
 
 // Hacer la función global para que pueda ser llamada desde HTML dinámico
 window.togglePassword = togglePassword;
+
+// Función para deshabilitar/habilitar botón y mostrar estado de carga
+function toggleButtonState(button, isLoading, originalText, loadingText) {
+  if (isLoading) {
+    button.disabled = true;
+    button.style.opacity = '0.6';
+    button.style.cursor = 'not-allowed';
+    button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+  } else {
+    button.disabled = false;
+    button.style.opacity = '1';
+    button.style.cursor = 'pointer';
+    button.innerHTML = originalText;
+  }
+}
 
 // Obtener información del usuario y mostrar nombre
 async function getUserInfo() {
@@ -524,6 +545,12 @@ async function getUserInfo() {
     imagenPreview.innerHTML = '';
     contactId.value = '';
     modalTitle.textContent = isEdit ? 'Editar Contacto' : 'Añadir Contacto';
+    
+    // Resetear estado del botón
+    if (saveBtn) {
+      toggleButtonState(saveBtn, false, 'Guardar', 'Guardando...');
+    }
+    
     contactModal.style.display = 'block';
   }
 
@@ -532,6 +559,12 @@ async function getUserInfo() {
     categoryForm.reset();
     categoryId.value = '';
     categoryModalTitle.textContent = isEdit ? 'Editar Categoría' : 'Añadir Categoría';
+    
+    // Resetear estado del botón
+    if (saveCategoryBtn) {
+      toggleButtonState(saveCategoryBtn, false, 'Guardar', 'Guardando...');
+    }
+    
     categoryModal.style.display = 'block';
   }
 
@@ -541,6 +574,17 @@ async function getUserInfo() {
     categoryModal.style.display = 'none';
     usersModal.style.display = 'none';
     userFormModal.style.display = 'none';
+    
+    // Resetear estados de botones al cerrar
+    isSubmittingContact = false;
+    isSubmittingCategory = false;
+    
+    if (saveBtn) {
+      toggleButtonState(saveBtn, false, 'Guardar', 'Guardando...');
+    }
+    if (saveCategoryBtn) {
+      toggleButtonState(saveCategoryBtn, false, 'Guardar', 'Guardando...');
+    }
   }
 
   // Editar contacto
@@ -1008,9 +1052,22 @@ async function editContact(id) {
     }
   });
   
-  // Guardar contacto
+  // Guardar contacto - CON PREVENCIÓN DE DUPLICADOS
   contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    // Prevenir múltiples envíos
+    if (isSubmittingContact) {
+      console.log('Ya se está procesando un contacto, ignorando envío adicional');
+      return;
+    }
+    
+    isSubmittingContact = true;
+    
+    // Deshabilitar botón y mostrar estado de carga
+    if (saveBtn) {
+      toggleButtonState(saveBtn, true, 'Guardar', 'Guardando...');
+    }
     
     const formData = new FormData();
     formData.append('nombre', document.getElementById('nombre').value);
@@ -1031,6 +1088,8 @@ async function editContact(id) {
       const url = isEdit ? `/api/contactos/${id}` : '/api/contactos';
       const method = isEdit ? 'PUT' : 'POST';
       
+      console.log(`${isEdit ? 'Actualizando' : 'Creando'} contacto...`);
+      
       const response = await fetch(url, {
         method: method,
         headers: {
@@ -1040,21 +1099,49 @@ async function editContact(id) {
       });
 
       if (!response.ok) {
-        throw new Error(`Error al ${isEdit ? 'actualizar' : 'crear'} contacto`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error al ${isEdit ? 'actualizar' : 'crear'} contacto`);
       }
 
+      const result = await response.json();
+      console.log(`Contacto ${isEdit ? 'actualizado' : 'creado'} exitosamente:`, result);
+
       closeModals();
-      loadContacts();
-      loadCategories();
+      await loadContacts();
+      await loadCategories();
+      
+      // Mostrar mensaje de éxito
+      const action = isEdit ? 'actualizado' : 'creado';
+      alert(`Contacto ${action} exitosamente`);
+      
     } catch (error) {
       console.error('Error:', error);
-      alert(`Error al ${isEdit ? 'actualizar' : 'crear'} contacto`);
+      alert(error.message);
+    } finally {
+      // Restaurar estado del botón y permitir nuevos envíos
+      isSubmittingContact = false;
+      if (saveBtn) {
+        toggleButtonState(saveBtn, false, 'Guardar', 'Guardando...');
+      }
     }
   });
   
-  // Guardar categoría
+  // Guardar categoría - CON PREVENCIÓN DE DUPLICADOS
   categoryForm.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    // Prevenir múltiples envíos
+    if (isSubmittingCategory) {
+      console.log('Ya se está procesando una categoría, ignorando envío adicional');
+      return;
+    }
+    
+    isSubmittingCategory = true;
+    
+    // Deshabilitar botón y mostrar estado de carga
+    if (saveCategoryBtn) {
+      toggleButtonState(saveCategoryBtn, true, 'Guardar', 'Guardando...');
+    }
     
     const nombre = document.getElementById('nombre-categoria').value;
     const id = categoryId.value;
@@ -1063,6 +1150,8 @@ async function editContact(id) {
     try {
       const url = isEdit ? `/api/categorias/${id}` : '/api/categorias';
       const method = isEdit ? 'PUT' : 'POST';
+      
+      console.log(`${isEdit ? 'Actualizando' : 'Creando'} categoría...`);
       
       const response = await fetch(url, {
         method: method,
@@ -1074,15 +1163,30 @@ async function editContact(id) {
       });
 
       if (!response.ok) {
-        throw new Error(`Error al ${isEdit ? 'actualizar' : 'crear'} categoría`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error al ${isEdit ? 'actualizar' : 'crear'} categoría`);
       }
 
+      const result = await response.json();
+      console.log(`Categoría ${isEdit ? 'actualizada' : 'creada'} exitosamente:`, result);
+
       closeModals();
-      loadCategories();
-      loadContacts();
+      await loadCategories();
+      await loadContacts();
+      
+      // Mostrar mensaje de éxito
+      const action = isEdit ? 'actualizada' : 'creada';
+      alert(`Categoría ${action} exitosamente`);
+      
     } catch (error) {
       console.error('Error:', error);
-      alert(`Error al ${isEdit ? 'actualizar' : 'crear'} categoría`);
+      alert(error.message);
+    } finally {
+      // Restaurar estado del botón y permitir nuevos envíos
+      isSubmittingCategory = false;
+      if (saveCategoryBtn) {
+        toggleButtonState(saveCategoryBtn, false, 'Guardar', 'Guardando...');
+      }
     }
   });
   

@@ -39,11 +39,21 @@ const usuariosController = {
         });
       }
       
-      // Validar requisitos de la nueva contraseña
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(passwordNueva)) {
+      // Validar requisitos de la nueva contraseña - USANDO FUNCIÓN MEJORADA
+      console.log('Validando nueva contraseña:', passwordNueva);
+      const passwordValidation = validatePassword(passwordNueva);
+      if (!passwordValidation.isValid) {
+        console.log('Nueva contraseña no cumple requisitos:', passwordValidation.errors);
         return res.status(400).json({
-          error: 'La nueva contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
+          error: 'La nueva contraseña no cumple con los requisitos de seguridad',
+          details: passwordValidation.errors,
+          requirements: [
+            'Mínimo 8 caracteres',
+            'Al menos una letra mayúscula (A-Z)',
+            'Al menos una letra minúscula (a-z)',
+            'Al menos un número (0-9)',
+            'Al menos un símbolo (!@#$%^&*()_+-=[]{};\':"|,.<>/?~`)'
+          ]
         });
       }
       
@@ -96,5 +106,61 @@ const usuariosController = {
     }
   }
 };
+
+// Función para validar contraseña - MISMA QUE EN authController
+function validatePassword(password) {
+  console.log('Validando contraseña en usuariosController:', password);
+  console.log('Longitud de contraseña:', password.length);
+  
+  const errors = [];
+  const analysis = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)
+  };
+  
+  console.log('Análisis de contraseña:', analysis);
+  
+  // Validar cada requisito
+  if (!analysis.length) {
+    errors.push('La contraseña debe tener al menos 8 caracteres');
+  }
+  
+  if (!analysis.uppercase) {
+    errors.push('La contraseña debe contener al menos una letra mayúscula (A-Z)');
+  }
+  
+  if (!analysis.lowercase) {
+    errors.push('La contraseña debe contener al menos una letra minúscula (a-z)');
+  }
+  
+  if (!analysis.number) {
+    errors.push('La contraseña debe contener al menos un número (0-9)');
+  }
+  
+  if (!analysis.symbol) {
+    errors.push('La contraseña debe contener al menos un símbolo (!@#$%^&*()_+-=[]{};\':"|,.<>/?~`)');
+    
+    // Debug adicional para símbolos
+    const foundSymbols = password.match(/[^a-zA-Z0-9]/g);
+    console.log('Símbolos encontrados en contraseña:', foundSymbols);
+    
+    // Verificar específicamente algunos símbolos comunes
+    const commonSymbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=', '[', ']', '{', '}', ';', "'", ':', '"', '\\', '|', ',', '.', '<', '>', '/', '?', '~', '`'];
+    const foundCommonSymbols = commonSymbols.filter(symbol => password.includes(symbol));
+    console.log('Símbolos comunes encontrados:', foundCommonSymbols);
+  }
+  
+  const isValid = errors.length === 0;
+  console.log('Validación resultado:', { isValid, errorsCount: errors.length });
+  
+  return {
+    isValid,
+    errors,
+    analysis
+  };
+}
 
 module.exports = usuariosController;

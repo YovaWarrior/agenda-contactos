@@ -184,11 +184,129 @@ small {
   background: var(--menu-hover);
 }
 
+/* Estilos mejorados para el indicador de fortaleza de contraseña */
+#password-strength-indicator {
+  display: none;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#password-strength-indicator .indicator-title {
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+#password-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  padding: 3px 0;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.requirement.valid {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.requirement.invalid {
+  color: var(--text-secondary);
+}
+
+.req-icon {
+  margin-right: 8px;
+  font-size: 12px;
+  width: 16px;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Requisito de símbolo ocupa toda la fila */
+#req-symbol {
+  grid-column: 1 / -1;
+}
+
+/* Animaciones suaves */
+.requirement {
+  transform: translateX(0);
+  transition: all 0.3s ease;
+}
+
+.requirement.valid {
+  transform: translateX(2px);
+}
+
+/* Mejora visual para símbolos válidos */
+.requirement.valid .req-icon {
+  animation: checkmark 0.3s ease;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Estilos para el código de símbolos */
+code {
+  background-color: var(--bg-secondary);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* Mejoras para small text */
+small {
+  line-height: 1.4;
+}
+
+small strong {
+  color: var(--text-primary);
+}
+
+/* Lista de requisitos más compacta */
+small br {
+  line-height: 1.2;
+}
+
 @media (max-width: 480px) {
   .container {
     max-width: 100%;
     border-radius: 0;
     padding: 20px;
     box-shadow: none;
+  }
+  
+  #password-requirements {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  
+  #req-symbol {
+    grid-column: 1;
   }
 }
