@@ -1,0 +1,31 @@
+BACKUP AGENDA DE CONTACTOS - FESTEC 2025
+==========================================
+
+Fecha del backup: 29/5/2025, 20:24:55
+Sistema operativo: FreeBSD
+Tamaño BD original: 36.00 KB
+Normalización: 3FN (Tercera Forma Normal)
+
+Archivos generados:
+- agenda_contactos_2025-05-30T02-24-55.sqlite (Base de datos completa)
+- agenda_contactos_dump_2025-05-30T02-24-55.sql (Estructura + todos los datos)
+- agenda_contactos_schema_2025-05-30T02-24-55.sql (Solo estructura de tablas)
+- database_tables_2025-05-30T02-24-55.txt (Lista de tablas disponibles)
+
+Para verificar el contenido:
+sqlite3 agenda_contactos_2025-05-30T02-24-55.sqlite
+.tables
+.schema
+SELECT * FROM usuarios;
+.quit
+
+Para restaurar en otro sistema:
+1. Copiar archivo .sqlite: cp agenda_contactos_2025-05-30T02-24-55.sqlite agenda_contactos.sqlite
+2. O ejecutar dump SQL: sqlite3 nueva_bd.sqlite < agenda_contactos_dump_2025-05-30T02-24-55.sql
+
+Compatibilidad probada:
+✅ FreeBSD 13.x
+✅ Haiku OS
+
+Universidad Mariano Gálvez de Puerto Barrios
+Sistemas Operativos II - FESTEC 2025
